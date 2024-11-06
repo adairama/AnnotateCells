@@ -13,42 +13,68 @@ knitr::opts_chunk$set(
 )
 ```
 
-# AnnotateCells
+# AnnotateCell
 
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of AnnotateCells is to ...
+Cell type identification remains a key challenge in single-cell RNA-seq and spatial transcriptomics datasets despite a decade of research in this area.
+
+There are many reference-based annotation tools to help with cell type annotation. However, the input and output formats differ greatly, increasing the burden on users to use and compare multiple tools. 
+
+This package `AnnotateCell` aims to provide a unified wrapper to run several annotation tools conveniently.
+
 
 ## Installation
 
-You can install the development version of AnnotateCells like so:
+You can install AnnotateCell like so:
 
-``` r
-# FILL THIS IN! HOW CAN PEOPLE INSTALL YOUR DEV PACKAGE?
+```{r, eval=FALSE}
+library(remotes)
+install_github("adairama/AnnotateCell")
 ```
 
-## Example
+# Illustration
 
-This is a basic example which shows you how to solve a common problem:
+## Demo dataset
 
-```{r eval=F}
-library(AnnotateCells)
-## basic example code
+We will load the `pbmc.demo` dataset. This is a Seurat object containing 2,635 peripheral blood mononuclear cells (PBMC) from 10X Genomics experiment. This is the same dataset used in the fundamental Seurat vignette after QC filtering with PCA and UMAP embedding. See help(pbmc.demo) for more details.
+
+```{r dataset}
+library(AnnotateCell)
+
+pbmc.demo
+
+pbmc.demo@meta.data %>% head()
+```
+The authors of Seurat package provided their annotation which is stored as `seurat_annotations` in the meta data.
+
+```{r}
+pbmc.demo@meta.data %>% 
+  janitor::tabyl(seurat_annotations)
 ```
 
-What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
+## Run RCAv2 annotation
 
-```{r cars}
-summary(cars)
+Here is an example on how to run the RCAv2 tool with the GlobalPanel_CellTypes panel.
+
+```{r example}
+pred <- AnnotateCell(pbmc.demo, "RCAv2.GlobalPanel_CellTypes")
+
+head(pred)
 ```
 
-You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date. `devtools::build_readme()` is handy for this.
+## Comparing the annotation
 
-You can also embed plots, for example:
+The first task is to add the prediction to the Seurat object.
 
-```{r pressure, echo = FALSE}
-plot(pressure)
+```{r}
+pbmc.demo <- AddMetaData(pbmc.demo, pred)
 ```
 
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub and CRAN.
+```{r}
+cts <- pbmc.demo@meta.data %>% 
+  count(group = seurat_annotations, pred = ann.RCAv2.GlobalPanel_CellTypes) %>% 
+  arrange(group, desc(n))
+```
+
