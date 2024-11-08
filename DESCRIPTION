@@ -1,4 +1,4 @@
-Package: AnnotateCell
+Package: AnnotateCells
 Type: Package
 Title: Annotate RNA-seq from Single-cell Level With Multiple Tools Using A Simple Wrapper
 Description: Functions to run multiple cell type annotation tools in a unified manner
@@ -20,5 +20,5 @@ LazyData: true
 Depends: R(>= 4.0.1), Seurat (>= 5.0.0), tidyverse (>= 2.0.0)
 Imports: RCAv2, DISCOtoolkit, Azimuth, SingleR, celldex
 RoxygenNote: 7.3.2
-URL: https://github.com/adairama/AnnotateCell
+URL: https://github.com/adairama/AnnotateCells
 BugReports: https://github.com/adairama/AnnotateCell/issues

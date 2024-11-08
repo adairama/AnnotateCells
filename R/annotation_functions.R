@@ -92,11 +92,11 @@ RCAannotate <- function(obj, panel.name, ...){
 #'
 #' @examples
 #' data(pbmc.demo)
-#' out <- AnnotateCell( pbmc.demo, "RCAv2.GlobalPanel_CellTypes" )
+#' out <- AnnotateCells( pbmc.demo, "RCAv2.GlobalPanel_CellTypes" )
 #'
-AnnotateCell <- function(obj,
-                         panel = "RCAv2.GlobalPanel_CellTypes",
-                         ...){
+AnnotateCells <- function(obj,
+                          panel = "RCAv2.GlobalPanel_CellTypes",
+                          ...){
 
   if( identical(GetAssayData(obj, layer = "count"), GetAssayData(obj, layer = "data" ) ) )
     warning("The data layer does not appear to be normalized. Please check.")

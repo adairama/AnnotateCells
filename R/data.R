@@ -11,16 +11,18 @@
 #'   \item{nFeature_RNA}{Number of genes detected for each cell}
 #'   \item{percent.mt}{Percentage of reads mapping to mitochondrial genes per cell}
 #'   \item{seurat_annotations}{Cell type annotation provided by authors of Seurat }
+#'   \item{RNA_snn_res.0.8}{Communities detected using Louvain algorithm at a resolution 0.8}
 #' }
 #'
 #' @examples
-#' pbmc.demo@meta.data %>% tabyl(seurat_annotations)
+#' pbmc.demo@meta.data %>%
+#'   tabyl(seurat_annotations, RNA_snn_res.0.8)
 #'
 #' DimPlot(pbmc.demo,
 #'         reduction = "umap",
-#'         group.by  = "seurat_annotations",
+#'         group.by  = "RNA_snn_res.0.8",
 #'         label = TRUE) +
 #'   NoLegend()
 #'
-#' @source pbmc3k data from the SeuratData package
+#' @source pbmc3k data from the SeuratData package with some data processing
 "pbmc.demo"
