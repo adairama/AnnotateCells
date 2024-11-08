@@ -1,4 +1,4 @@
-pacman::p_load(tidyverse, janitor)
+pacman::p_load(Seurat, tidyverse, janitor)
 
 # Load pbmc3k dataset
 options(timeout=600)
