@@ -47,13 +47,13 @@ library(AnnotateCells)
 #> 
 #>     intersect, t
 #> Loading required package: tidyverse
-#> ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+#> ── Attaching core tidyverse packages ────────────────────────────────────────────────────────────────────────────────────────────── tidyverse 2.0.0 ──
 #> ✔ dplyr     1.1.4     ✔ readr     2.1.5
 #> ✔ forcats   1.0.0     ✔ stringr   1.5.1
 #> ✔ ggplot2   3.5.1     ✔ tibble    3.2.1
 #> ✔ lubridate 1.9.3     ✔ tidyr     1.3.1
 #> ✔ purrr     1.0.2     
-#> ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+#> ── Conflicts ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
 #> ✖ dplyr::filter() masks stats::filter()
 #> ✖ dplyr::lag()    masks stats::lag()
 #> ℹ Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors
@@ -61,20 +61,13 @@ library(AnnotateCells)
 data(pbmc.demo)
 
 pbmc.demo@meta.data %>% head()
-#>                nCount_RNA nFeature_RNA percent.mt seurat_annotations
-#> AAACATACAACCAC       2419          779        3.0       Memory CD4 T
-#> AAACATTGAGCTAC       4903         1352        3.8                  B
-#> AAACATTGATCAGC       3147         1129        0.9       Memory CD4 T
-#> AAACCGTGCTTCCG       2639          960        1.7         CD14+ Mono
-#> AAACCGTGTATGCG        980          521        1.2                 NK
-#> AAACGCACTGGTAC       2163          781        1.7       Memory CD4 T
-#>                RNA_snn_res.0.8
-#> AAACATACAACCAC               1
-#> AAACATTGAGCTAC               2
-#> AAACATTGATCAGC               1
-#> AAACCGTGCTTCCG               4
-#> AAACCGTGTATGCG               7
-#> AAACGCACTGGTAC               1
+#>                nCount_RNA nFeature_RNA percent.mt seurat_annotations RNA_snn_res.0.8
+#> AAACATACAACCAC       2419          779        3.0       Memory CD4 T               1
+#> AAACATTGAGCTAC       4903         1352        3.8                  B               2
+#> AAACATTGATCAGC       3147         1129        0.9       Memory CD4 T               1
+#> AAACCGTGCTTCCG       2639          960        1.7         CD14+ Mono               4
+#> AAACCGTGTATGCG        980          521        1.2                 NK               7
+#> AAACGCACTGGTAC       2163          781        1.7       Memory CD4 T               1
 ```
 
 The authors of Seurat package provided `seurat_annotations`. However, we
@@ -82,20 +75,10 @@ will use `RNA_snn_res.0.8` which represents the communities detected
 using Louvain algorithm at a resolution 0.8.
 
 ``` r
-pbmc.demo@meta.data %>% 
-  janitor::tabyl(RNA_snn_res.0.8)
-#>  RNA_snn_res.0.8   n     percent
-#>                0 585 0.222011385
-#>                1 481 0.182542694
-#>                2 344 0.130550285
-#>                3 270 0.102466793
-#>                4 256 0.097153700
-#>                5 223 0.084629981
-#>                6 159 0.060341556
-#>                7 145 0.055028463
-#>                8 123 0.046679317
-#>                9  36 0.013662239
-#>               10  13 0.004933586
+table(pbmc.demo$RNA_snn_res.0.8)
+#> 
+#>   0   1   2   3   4   5   6   7   8   9  10 
+#> 585 481 344 270 256 223 159 145 123  36  13
 ```
 
 ## Run RCAv2 annotation
@@ -138,45 +121,49 @@ However, each cluster may contain multiple prediction labels as the
 cross table below demonstrates,
 
 ``` r
-pbmc.demo@meta.data %>% 
-  janitor::tabyl(ann.RCAv2.GlobalPanel_CellTypes, RNA_snn_res.0.8)
-#>      ann.RCAv2.GlobalPanel_CellTypes   0   1   2   3   4   5   6   7  8  9 10
-#>                               L2_ESC   0   0   0   0   0   0   0   0  1  0  0
-#>                  L45_CMP_Bone.Marrow   4   0   0   0   0   0   0   0  1  0  1
-#>            L48_Myelocyte_Bone.Marrow   0   0   0   0   0   2   0   0  0  0  0
-#>               L51_B.Cell_Bone.Marrow   0   0 320   0   0   0   0   0  0  0  0
-#>                         L52_Platelet   0   0   0   0   0   0   0   0  0  0 11
-#>                    L59_Monocyte_CD14   0   0   0   0 204 195   0   0  0 31  0
-#>                    L60_Monocyte_CD16   0   0   0   0  51  17 102   0  0  0  0
-#>                    L61_Monocyte_CD16   0   0   0   0   0   2  57   0  0  0  0
-#>                         L62_Monocyte   0   0   0   0   0   3   0   0  0  0  1
-#>      L64_Macrophage_Monocyte.derived   0   0   0   0   1   4   0   0  0  0  0
-#>  L69_Dendritic.Cell_Monocyte.derived   0   0   0   0   0   0   0   0  0  1  0
-#>      L72_Dendritic.Cell_Plasmacytoid   0   0   0   0   0   0   0   0  0  4  0
-#>                 L73_T.Cell_CD4.Naive 358  55   0   0   0   0   0   0 31  0  0
-#>         L74_T.Cell_CD4.Centr..Memory 119 166   0  20   0   0   0   0 27  0  0
-#>         L75_T.Cell_CD4.Centr..Memory  83 183   0   0   0   0   0   0 12  0  0
-#>           L76_T.Cell_CD4.Eff..Memory  11  71   0  74   0   0   0   0 19  0  0
-#>         L77_T.Cell_CD8.Centr..Memory   0   0   0   4   0   0   0   0  1  0  0
-#>                       L78_T.Cell_CD8   2   3   0 114   0   0   0   5 16  0  0
-#>           L80_T.Cell_CD8.Eff..Memory   8   2   0   0   0   0   0   0  6  0  0
-#>                 L81_T.Cell_CD8.Naive   0   0   0   2   0   0   0   0  3  0  0
-#>                       L82_T.Cell_CD8   0   1   1  33   0   0   0   4  5  0  0
-#>                   L85_NK.Cell_CD56Hi   0   0   0  10   0   0   0  12  1  0  0
-#>                   L86_NK.Cell_CD56Lo   0   0   0  13   0   0   0 124  0  0  0
-#>                           L89_B.Cell   0   0   2   0   0   0   0   0  0  0  0
-#>                     L90_B.Cell_Naive   0   0  16   0   0   0   0   0  0  0  0
-#>                    L92_B.Cell_Memory   0   0   2   0   0   0   0   0  0  0  0
-#>               L93_B.Cell_Plasma.Cell   0   0   3   0   0   0   0   0  0  0  0
+table(pbmc.demo$ann.RCAv2.GlobalPanel_CellTypes, pbmc.demo$RNA_snn_res.0.8) %>% 
+  print(zero.print = ".")
+#>                                      
+#>                                         0   1   2   3   4   5   6   7   8   9  10
+#>   L2_ESC                                .   .   .   .   .   .   .   .   1   .   .
+#>   L45_CMP_Bone.Marrow                   4   .   .   .   .   .   .   .   1   .   1
+#>   L48_Myelocyte_Bone.Marrow             .   .   .   .   .   2   .   .   .   .   .
+#>   L51_B.Cell_Bone.Marrow                .   . 320   .   .   .   .   .   .   .   .
+#>   L52_Platelet                          .   .   .   .   .   .   .   .   .   .  11
+#>   L59_Monocyte_CD14                     .   .   .   . 204 195   .   .   .  31   .
+#>   L60_Monocyte_CD16                     .   .   .   .  51  17 102   .   .   .   .
+#>   L61_Monocyte_CD16                     .   .   .   .   .   2  57   .   .   .   .
+#>   L62_Monocyte                          .   .   .   .   .   3   .   .   .   .   1
+#>   L64_Macrophage_Monocyte.derived       .   .   .   .   1   4   .   .   .   .   .
+#>   L69_Dendritic.Cell_Monocyte.derived   .   .   .   .   .   .   .   .   .   1   .
+#>   L72_Dendritic.Cell_Plasmacytoid       .   .   .   .   .   .   .   .   .   4   .
+#>   L73_T.Cell_CD4.Naive                358  55   .   .   .   .   .   .  31   .   .
+#>   L74_T.Cell_CD4.Centr..Memory        119 166   .  20   .   .   .   .  27   .   .
+#>   L75_T.Cell_CD4.Centr..Memory         83 183   .   .   .   .   .   .  12   .   .
+#>   L76_T.Cell_CD4.Eff..Memory           11  71   .  74   .   .   .   .  19   .   .
+#>   L77_T.Cell_CD8.Centr..Memory          .   .   .   4   .   .   .   .   1   .   .
+#>   L78_T.Cell_CD8                        2   3   . 114   .   .   .   5  16   .   .
+#>   L80_T.Cell_CD8.Eff..Memory            8   2   .   .   .   .   .   .   6   .   .
+#>   L81_T.Cell_CD8.Naive                  .   .   .   2   .   .   .   .   3   .   .
+#>   L82_T.Cell_CD8                        .   1   1  33   .   .   .   4   5   .   .
+#>   L85_NK.Cell_CD56Hi                    .   .   .  10   .   .   .  12   1   .   .
+#>   L86_NK.Cell_CD56Lo                    .   .   .  13   .   .   . 124   .   .   .
+#>   L89_B.Cell                            .   .   2   .   .   .   .   .   .   .   .
+#>   L90_B.Cell_Naive                      .   .  16   .   .   .   .   .   .   .   .
+#>   L92_B.Cell_Memory                     .   .   2   .   .   .   .   .   .   .   .
+#>   L93_B.Cell_Plasma.Cell                .   .   3   .   .   .   .   .   .   .   .
 ```
 
-We can visualize this via
+It can be easier to visualize this information (e.g. cluster 3) via the
+following barplot. The segments are ordered in descending order of
+popularity until at least 70% of the cells are accounted for (you can
+adjust this using the `thres` parameter). The remaining labels are
+lumped together as Misc. and colored in grey.
 
 ``` r
 align_prediction_to_cluster(
   prediction = pbmc.demo$ann.RCAv2.GlobalPanel_CellTypes,
-  cluster    = pbmc.demo$RNA_snn_res.0.8,
-  text.size  = 3
+  cluster    = pbmc.demo$RNA_snn_res.0.8 
 )
 ```
 
