@@ -11,6 +11,8 @@ knitr::opts_chunk$set(
   fig.path = "man/figures/README-",
   out.width = "100%"
 )
+
+options(width = 150)
 ```
 
 # AnnotateCells
@@ -50,8 +52,7 @@ pbmc.demo@meta.data %>% head()
 The authors of Seurat package provided `seurat_annotations`. However, we will use `RNA_snn_res.0.8` which represents the communities detected using Louvain algorithm at a resolution 0.8.
 
 ```{r}
-pbmc.demo@meta.data %>% 
-  janitor::tabyl(RNA_snn_res.0.8)
+table(pbmc.demo$RNA_snn_res.0.8)
 ```
 
 ## Run RCAv2 annotation
@@ -79,16 +80,16 @@ With the exception of the DISCO reference tool, `AnnotateCells()` provides predi
 However, each cluster may contain multiple prediction labels as the cross table below demonstrates, 
 
 ```{r}
-pbmc.demo@meta.data %>% 
-  janitor::tabyl(ann.RCAv2.GlobalPanel_CellTypes, RNA_snn_res.0.8)
+table(pbmc.demo$ann.RCAv2.GlobalPanel_CellTypes, pbmc.demo$RNA_snn_res.0.8) %>% 
+  print(zero.print = ".")
 ```
 
-We can visualize this via
+It can be easier to visualize this information (e.g. cluster 3) via the following barplot. 
+The segments are ordered in descending order of popularity until at least 70% of the cells are accounted for (you can adjust this using the `thres` parameter). The remaining labels are lumped together as Misc. and colored in grey.
 ```{r, eval = FALSE}
 align_prediction_to_cluster(
   prediction = pbmc.demo$ann.RCAv2.GlobalPanel_CellTypes,
-  cluster    = pbmc.demo$RNA_snn_res.0.8,
-  text.size  = 3
+  cluster    = pbmc.demo$RNA_snn_res.0.8 
 )
 ```
 
@@ -98,7 +99,7 @@ knitr::include_graphics("man/figures/align_prediction_to_cluster.png")
 
 Here is an alternative text output:
 
-```{r, width="150%"}
+```{r}
 align_prediction_to_cluster(
   prediction = pbmc.demo$ann.RCAv2.GlobalPanel_CellTypes,
   cluster    = pbmc.demo$RNA_snn_res.0.8,
