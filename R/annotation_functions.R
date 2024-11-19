@@ -81,6 +81,7 @@ RCAannotate <- function(obj, panel.name, ...){
   return(pred)
 }
 
+
 #' A wrapper function to call various single-cell annotation tools.
 #'
 #' @param obj A Seurat object
