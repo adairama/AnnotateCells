@@ -1,4 +1,4 @@
-pacman::p_load(Seurat, tidyverse, janitor)
+pacman::p_load(Seurat, tidyverse, janitor, usethis)
 
 # Load pbmc3k dataset
 options(timeout=600)
@@ -20,7 +20,7 @@ pbmc.demo@meta.data  <- relocate(pbmc.demo@meta.data,
 VlnPlot(pbmc.demo, c("nCount_RNA", "nFeature_RNA", "percent.mt"))
 
 pbmc.demo <- subset(pbmc.demo,
-                    nFeature_RNA > 200 &
+                      nFeature_RNA > 200 &
                       nFeature_RNA < 2500 &
                       percent.mt   < 5)
 
@@ -90,5 +90,4 @@ g1 | g2
 object.size(pbmc.demo) %>% format(units = "Mb")  # 59.5 Mb
 
 # Save
-usethis::use_data(pbmc.demo, overwrite = TRUE)
-
+use_data(pbmc.demo, overwrite = TRUE)
