@@ -27,7 +27,7 @@ rm(RCAv2_panels)
 library(DISCOtoolkit)
 options(timeout = 600)
 
-## DISCO DEG
+## DISCO DEG ----
 DISCO_ref_deg <- readRDS( url(paste0(getOption("disco_url"), "toolkit/getRefDeg")) )
 dim(DISCO_ref_deg)  # 197,516 genes
 
@@ -39,7 +39,7 @@ DISCO_ref_deg %>% tabyl(group) %>% arrange(n) %>% pull(n) %>% summary()
 
 use_data(DISCO_ref_deg, overwrite = TRUE, compress = "xz")
 
-## DISCO reference panel
+## DISCO reference panel ----
 DISCO_ref_data <- readRDS( url(paste0(getOption("disco_url"), "toolkit/getRef")) )
 
 dim(DISCO_ref_data)
@@ -48,10 +48,10 @@ dim(DISCO_ref_data)
 use_data(DISCO_ref_data, overwrite = TRUE, compress = "xz")
 
 
-## DISCO atlas
+## DISCO atlas ----
 DISCO_atlas <- str_split_i( colnames(DISCO_ref_data), pattern = "--", i = 2 ) %>% unique()
 length(DISCO_atlas) # 39 atlas
 
-use_data(DISCO_atlas, overwrite = TRUE, compress = "xz")
+use_data(DISCO_atlas, overwrite = TRUE, compress = "bzip2")
 
 rm(DISCO_ref_deg, DISCO_ref_data, DISCO_atlas)
