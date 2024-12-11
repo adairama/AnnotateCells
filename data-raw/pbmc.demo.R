@@ -14,15 +14,15 @@ object.size(pbmc.demo) %>% format(units = "Mb")  # 53.9 Mb
 pbmc.demo$percent.mt <- PercentageFeatureSet(pbmc.demo, pattern = "^MT-|^Mt-") %>% round(1)
 
 pbmc.demo@meta.data  <- relocate(pbmc.demo@meta.data,
-                            "seurat_annotations",
-                            .after = "percent.mt")
+                                 "seurat_annotations",
+                                 .after = "percent.mt")
 
 VlnPlot(pbmc.demo, c("nCount_RNA", "nFeature_RNA", "percent.mt"))
 
 pbmc.demo <- subset(pbmc.demo,
-                 nFeature_RNA > 200 &
-                 nFeature_RNA < 2500 &
-                 percent.mt   < 5)
+                    nFeature_RNA > 200 &
+                      nFeature_RNA < 2500 &
+                      percent.mt   < 5)
 
 pbmc.demo # 2638 cells after QC
 
@@ -74,9 +74,9 @@ pbmc.demo@meta.data %>%
   tabyl(seurat_annotations, RNA_snn_res.0.8)
 
 g1 <- DimPlot(pbmc.demo,
-        reduction = "umap",
-        group.by  = "seurat_annotations",
-        label = TRUE) +
+              reduction = "umap",
+              group.by  = "seurat_annotations",
+              label = TRUE) +
   NoLegend()
 
 g2 <- DimPlot(pbmc.demo,
@@ -90,5 +90,5 @@ g1 | g2
 object.size(pbmc.demo) %>% format(units = "Mb")  # 59.5 Mb
 
 # Save
-usethis::use_data(pbmc.demo, overwrite = TRUE, compress = "xz")
+usethis::use_data(pbmc.demo, overwrite = TRUE)
 
