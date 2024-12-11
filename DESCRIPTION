@@ -16,7 +16,7 @@ Authors@R:
              comment = c(ORCID = "0000-0003-1044-7204")))
 License: GPL-3
 Encoding: UTF-8
-LazyData: true
+LazyData: false
 Depends: R(>= 4.0.1), Seurat (>= 5.0.0), tidyverse (>= 2.0.0)
 Imports: RCAv2, DISCOtoolkit, Azimuth, SingleR, celldex
 RoxygenNote: 7.3.2
