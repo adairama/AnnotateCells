@@ -19,11 +19,22 @@ several annotation tools conveniently.
 
 ## Installation
 
-You can install AnnotateCells:
+We can ensure all the necessary prerequisites are met via
 
 ``` r
-library(remotes)
-install_github("adairama/AnnotateCells")
+if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
+
+pacman::p_load( Seurat, SingleR, celldex )
+
+pacman::p_load_gh("prabhakarlab/RCAv2")
+pacman::p_load_gh("JinmiaoChenLab/DISCOtoolkit")
+pacman::p_load_gh("satijalab/Azimuth")
+```
+
+Next, you can install AnnotateCells:
+
+``` r
+pacman::p_load_gh("adairama/AnnotateCells")
 ```
 
 # Illustration
@@ -39,20 +50,24 @@ help(pbmc.demo) for more details.
 ``` r
 library(AnnotateCells)
 #> Loading required package: Seurat
+#> Warning: package 'Seurat' was built under R version 4.4.2
 #> Loading required package: SeuratObject
 #> Loading required package: sp
+#> Warning: package 'sp' was built under R version 4.4.2
 #> 
 #> Attaching package: 'SeuratObject'
 #> The following objects are masked from 'package:base':
 #> 
 #>     intersect, t
 #> Loading required package: tidyverse
+#> Warning: package 'purrr' was built under R version 4.4.2
+#> Warning: package 'lubridate' was built under R version 4.4.2
 #> ── Attaching core tidyverse packages ────────────────────────────────────────────────────────────────────────────────────────────── tidyverse 2.0.0 ──
 #> ✔ dplyr     1.1.4     ✔ readr     2.1.5
 #> ✔ forcats   1.0.0     ✔ stringr   1.5.1
 #> ✔ ggplot2   3.5.1     ✔ tibble    3.2.1
-#> ✔ lubridate 1.9.3     ✔ tidyr     1.3.1
-#> ✔ purrr     1.0.2     
+#> ✔ lubridate 1.9.4     ✔ tidyr     1.3.1
+#> ✔ purrr     1.0.4
 #> ── Conflicts ──────────────────────────────────────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
 #> ✖ dplyr::filter() masks stats::filter()
 #> ✖ dplyr::lag()    masks stats::lag()
@@ -71,8 +86,8 @@ pbmc.demo@meta.data %>% head()
 ```
 
 The authors of Seurat package provided `seurat_annotations`. However, we
-will use `RNA_snn_res.0.8` which represents the communities detected
-using Louvain algorithm at a resolution 0.8.
+will use `RNA_snn_res.0.8` instead which was generated and represents
+the communities detected using Louvain algorithm at a resolution 0.8.
 
 ``` r
 table(pbmc.demo$RNA_snn_res.0.8)
