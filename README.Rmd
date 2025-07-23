@@ -29,12 +29,24 @@ This package `AnnotateCells` aims to provide a unified wrapper to run several an
 
 ## Installation
 
-You can install AnnotateCells:
+We can ensure all the necessary prerequisites are met via
 
 ```{r, eval=FALSE}
-library(remotes)
-install_github("adairama/AnnotateCells")
+if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
+
+pacman::p_load( Seurat, SingleR, celldex )
+
+pacman::p_load_gh("prabhakarlab/RCAv2")
+pacman::p_load_gh("JinmiaoChenLab/DISCOtoolkit")
+pacman::p_load_gh("satijalab/Azimuth")
 ```
+
+Next, you can install AnnotateCells:
+
+```{r, eval=FALSE}
+pacman::p_load_gh("adairama/AnnotateCells")
+```
+
 
 # Illustration
 
@@ -49,7 +61,8 @@ data(pbmc.demo)
 
 pbmc.demo@meta.data %>% head()
 ```
-The authors of Seurat package provided `seurat_annotations`. However, we will use `RNA_snn_res.0.8` which represents the communities detected using Louvain algorithm at a resolution 0.8.
+
+The authors of Seurat package provided `seurat_annotations`. However, we will use `RNA_snn_res.0.8` instead which was generated and represents the communities detected using Louvain algorithm at a resolution 0.8.
 
 ```{r}
 table(pbmc.demo$RNA_snn_res.0.8)

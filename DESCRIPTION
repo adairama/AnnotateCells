@@ -2,7 +2,7 @@ Package: AnnotateCells
 Type: Package
 Title: Annotate RNA-seq from Single-cell Level With Multiple Tools Using A Simple Wrapper
 Description: Functions to run multiple cell type annotation tools in a unified manner
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: 
     c(person(given   = "Adaikalavan", 
              family  = "Ramasamy",
