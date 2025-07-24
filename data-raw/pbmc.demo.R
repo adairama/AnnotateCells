@@ -15,7 +15,8 @@ object.size(pbmc.demo) %>% format(units = "Mb")  # 53.9 Mb
 
 # QC and Filter -----------------------------------------------------------
 
-pbmc.demo$percent.mt <- PercentageFeatureSet(pbmc.demo, pattern = "^MT-|^Mt-")
+pbmc.demo$percent.mt <- PercentageFeatureSet(pbmc.demo, pattern = "^MT-|^Mt-") %>%
+  round(digits = 2)
 
 pbmc.demo@meta.data  <- relocate(pbmc.demo@meta.data,
                                  "seurat_annotations",
@@ -109,4 +110,4 @@ g1 | g2
 
 object.size(pbmc.demo) %>% format(units = "Mb")  # 59.5 Mb
 
-use_data(pbmc.demo, overwrite = TRUE)
+usethis::use_data(pbmc.demo, overwrite = TRUE)

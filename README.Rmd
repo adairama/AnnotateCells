@@ -24,7 +24,7 @@ There are many reference-based annotation tools to help with cell type annotatio
 This package `AnnotateCells` aims to provide a unified wrapper to run several annotation tools conveniently.
 
 
-## Installation
+# Installation
 
 We can ensure all the necessary prerequisites are met via
 
@@ -45,9 +45,7 @@ pacman::p_load_gh("adairama/AnnotateCells")
 ```
 
 
-# Illustration
-
-## Demo dataset
+# Demo dataset
 
 We will load the `pbmc.demo` dataset. This is a Seurat object containing 2,635 peripheral blood mononuclear cells (PBMC) from 10X Genomics experiment. This is the same dataset used in the fundamental Seurat vignette after QC filtering with PCA and UMAP embedding. See `help(pbmc.demo)` for more details.
 
@@ -69,12 +67,16 @@ pbmc.demo@meta.data %>% head()
 table(pbmc.demo$RNA_snn_res.0.8)
 ```
 
+# Available panels
 
-## Run RCAv2 annotation
+dt
+
+
+# Run RCAv2 annotation
 
 Here is an example on how to run the RCAv2 tool with the GlobalPanel_CellTypes panel.
 
-```{r example}
+```{r}
 pred <- AnnotateCells(pbmc.demo, "RCAv2.GlobalPanel_CellTypes")
 
 dim(pred)
@@ -86,6 +88,20 @@ Let us add the prediction to the Seurat object.
 
 ```{r}
 pbmc.demo <- AddMetaData(pbmc.demo, pred)
+```
+
+
+# Run DISCO annotation
+
+When you run any of the DISCO annotation for the first time, it will take a few minutes to download the data from the server. 
+
+
+```{r}
+pred <- AnnotateCells(pbmc.demo, "DISCO.all")
+
+dim(pred)
+
+head(pred)
 ```
 
 
