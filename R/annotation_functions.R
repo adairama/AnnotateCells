@@ -185,7 +185,7 @@ DISCO_annotate <- function(obj, panel.name = "all", assay = "RNA", ...){
   if(panel.name == "all"){ atlas <- NULL } else { atlas <- panel.name }
 
   require(DISCOtoolkit)
-  grp_pred <- CELLiDCluster(data.ave, ref_data, ref_deg, atlas, ...) %>%
+  grp_pred <- CELLiDCluster(data.ave, ref_data, ref_deg, atlas, ncores = 1, ...) %>%
     rownames_to_column("Ident")
   grp_pred %>% mutate(Ident = gsub("^C", "", Ident)) %>% knitr::kable() %>% print()
 

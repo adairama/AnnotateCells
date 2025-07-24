@@ -98,41 +98,42 @@ The first time you run the DISCO annotation, the required reference data (~175 M
 ```{r}
 pred <- AnnotateCells(pbmc.demo, "DISCO.all")
 
-dim(pred)
+pbmc.demo <- AddMetaData(pbmc.demo, pred)
 
-head(pred)
+head(pbmc.demo@meta.data)
 ```
 
 
-## Aligning predicted cell type label with cluster group
+# Aligning annotation from cell-level to group-level
 
 With the exception of the DISCO reference tool, `AnnotateCells()` provides predictions at the individual cell level. Aligning these predicted cell type labels to cluster groups can be advantageous.
 However, each cluster may contain multiple prediction labels as the cross table below demonstrates, 
 
 ```{r}
-table(pbmc.demo$ann.RCAv2.GlobalPanel_CellTypes, pbmc.demo$RNA_snn_res.0.8) %>% 
+table( pbmc.demo$RCAv2.GlobalPanel_CellTypes,
+       pbmc.demo$RNA_snn_res.0.8 ) %>% 
   print(zero.print = ".")
 ```
 
 It can be easier to visualize this information (e.g. cluster 3) via the following barplot. 
 The segments are ordered in descending order of popularity until at least 70% of the cells are accounted for (you can adjust this using the `thres` parameter). The remaining labels are lumped together as Misc. and colored in grey.
 
-```{r, eval = FALSE}
+```{r}
 align_prediction_to_cluster(
-  prediction = pbmc.demo$ann.RCAv2.GlobalPanel_CellTypes,
+  prediction = pbmc.demo$RCAv2.GlobalPanel_CellTypes,
   cluster    = pbmc.demo$RNA_snn_res.0.8 
 )
 ```
 
 ```{r, echo = FALSE}
-knitr::include_graphics("man/figures/align_prediction_to_cluster.png")
+#knitr::include_graphics("man/figures/align_prediction_to_cluster.png")
 ```
 
 Here is an alternative text output:
 
-```{r, eval=FALSE}
+```{r}
 align_prediction_to_cluster(
-  prediction = pbmc.demo$ann.RCAv2.GlobalPanel_CellTypes,
+  prediction = pbmc.demo$RCAv2.GlobalPanel_CellTypes,
   cluster    = pbmc.demo$RNA_snn_res.0.8,
   type       = "split"
 )
