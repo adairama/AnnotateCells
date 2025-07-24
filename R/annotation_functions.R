@@ -187,7 +187,7 @@ DISCO_annotate <- function(obj, panel.name = "all", assay = "RNA", ...){
   require(DISCOtoolkit)
   grp_pred <- CELLiDCluster(data.ave, ref_data, ref_deg, atlas, ...) %>%
     rownames_to_column("Ident")
-  grp_pred %>% mutate(Ident = gsub("^C", "", Ident)) %>% knitr::kable()
+  grp_pred %>% mutate(Ident = gsub("^C", "", Ident)) %>% knitr::kable() %>% print()
 
   ## Map from group-level to cell-level prediction
   map <- grp_pred %>% select(Ident, predict_cell_type_1) %>% deframe()

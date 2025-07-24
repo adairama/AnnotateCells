@@ -93,8 +93,7 @@ pbmc.demo <- AddMetaData(pbmc.demo, pred)
 
 # Run DISCO annotation
 
-When you run any of the DISCO annotation for the first time, it will take a few minutes to download the data from the server. 
-
+The first time you run the DISCO annotation, the required reference data (~175 MB) will be downloaded from the server. This may take a few minutes (<5 min), depending on your internet speed. The downloaded data will be stored in the data directory of the `AnnotateCells` package for future use.
 
 ```{r}
 pred <- AnnotateCells(pbmc.demo, "DISCO.all")
