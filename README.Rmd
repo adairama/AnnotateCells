@@ -17,9 +17,6 @@ options(width = 150)
 
 # AnnotateCells
 
-<!-- badges: start -->
-<!-- badges: end -->
-
 Cell type identification remains a key challenge in single-cell RNA-seq and spatial transcriptomics datasets despite a decade of research in this area.
 
 There are many reference-based annotation tools to help with cell type annotation. However, the input and output formats differ greatly, increasing the burden on users to use and compare multiple tools. 
@@ -52,21 +49,26 @@ pacman::p_load_gh("adairama/AnnotateCells")
 
 ## Demo dataset
 
-We will load the `pbmc.demo` dataset. This is a Seurat object containing 2,635 peripheral blood mononuclear cells (PBMC) from 10X Genomics experiment. This is the same dataset used in the fundamental Seurat vignette after QC filtering with PCA and UMAP embedding. See help(pbmc.demo) for more details.
+We will load the `pbmc.demo` dataset. This is a Seurat object containing 2,635 peripheral blood mononuclear cells (PBMC) from 10X Genomics experiment. This is the same dataset used in the fundamental Seurat vignette after QC filtering with PCA and UMAP embedding. See `help(pbmc.demo)` for more details.
 
 ```{r dataset}
 library(AnnotateCells)
 
 data(pbmc.demo)
 
-pbmc.demo@meta.data %>% head()
+pbmc.demo
 ```
 
-The authors of Seurat package provided `seurat_annotations`. However, we will use `RNA_snn_res.0.8` instead which was generated and represents the communities detected using Louvain algorithm at a resolution 0.8.
+The Seurat package includes a column called `seurat_annotations`, which we will treat as the ground truth for evaluating annotation accuracy.
+
+For the purpose of demonstrating the cell annotation workflow, we will use annotate the 11 clusters found in the `RNA_snn_res.0.8` column. These clusters were generated using the Louvain algorithm with a resolution of 0.8.
 
 ```{r}
+pbmc.demo@meta.data %>% head()
+
 table(pbmc.demo$RNA_snn_res.0.8)
 ```
+
 
 ## Run RCAv2 annotation
 
@@ -99,6 +101,7 @@ table(pbmc.demo$ann.RCAv2.GlobalPanel_CellTypes, pbmc.demo$RNA_snn_res.0.8) %>%
 
 It can be easier to visualize this information (e.g. cluster 3) via the following barplot. 
 The segments are ordered in descending order of popularity until at least 70% of the cells are accounted for (you can adjust this using the `thres` parameter). The remaining labels are lumped together as Misc. and colored in grey.
+
 ```{r, eval = FALSE}
 align_prediction_to_cluster(
   prediction = pbmc.demo$ann.RCAv2.GlobalPanel_CellTypes,
@@ -112,7 +115,7 @@ knitr::include_graphics("man/figures/align_prediction_to_cluster.png")
 
 Here is an alternative text output:
 
-```{r}
+```{r, eval=FALSE}
 align_prediction_to_cluster(
   prediction = pbmc.demo$ann.RCAv2.GlobalPanel_CellTypes,
   cluster    = pbmc.demo$RNA_snn_res.0.8,

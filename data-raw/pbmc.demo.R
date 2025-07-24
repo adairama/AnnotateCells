@@ -1,17 +1,21 @@
 pacman::p_load(Seurat, tidyverse, janitor, usethis)
 
-# Load pbmc3k dataset
+
+# Load pbmc3k dataset -----------------------------------------------------
+
 options(timeout=600)
 SeuratData::InstallData("pbmc3k")
 pbmc.demo <- SeuratData::LoadData("pbmc3k")
+
 pbmc.demo$orig.ident <- NULL
 
 pbmc.demo   # 2700 cells
 object.size(pbmc.demo) %>% format(units = "Mb")  # 53.9 Mb
 
 
-# QC and Filter
-pbmc.demo$percent.mt <- PercentageFeatureSet(pbmc.demo, pattern = "^MT-|^Mt-") %>% round(1)
+# QC and Filter -----------------------------------------------------------
+
+pbmc.demo$percent.mt <- PercentageFeatureSet(pbmc.demo, pattern = "^MT-|^Mt-")
 
 pbmc.demo@meta.data  <- relocate(pbmc.demo@meta.data,
                                  "seurat_annotations",
@@ -26,7 +30,10 @@ pbmc.demo <- subset(pbmc.demo,
 
 pbmc.demo # 2638 cells after QC
 
-## Tabulate the author annotations
+
+
+# Tabulate the author annotations -----------------------------------------
+
 pbmc.demo@meta.data %>%
   tabyl(seurat_annotations) %>%
   knitr::kable()
@@ -44,7 +51,9 @@ pbmc.demo@meta.data %>%
 #   |Platelet           |  14| 0.0053071|
 
 
-# Preprocess the data
+
+# Preprocess the data -----------------------------------------------------
+
 pbmc.demo <- pbmc.demo %>%
   NormalizeData(verbose = FALSE) %>%
   FindVariableFeatures(verbose = FALSE) %>%
@@ -63,15 +72,23 @@ ndims <- 10
 pbmc.demo <- RunUMAP(pbmc.demo, dims = 1:ndims)
 
 
-# Build the neighbourhood graph and community detection
+
+# Louvain clustering ------------------------------------------------------
+
 pbmc.demo <- FindNeighbors(pbmc.demo, dims = 1:ndims)
 pbmc.demo <- FindClusters (pbmc.demo, res = 0.8)
 pbmc.demo$seurat_clusters <- NULL
 
+pbmc.demo$RNA_snn_res.0.8 <-
+  formatC( as.numeric(pbmc.demo$RNA_snn_res.0.8),
+         format = "d", flag = "0", digits = 1 ) %>%
+  paste0("C", .)
 
-# Crosstab
+
+# Crosstab with ground truth ----------------------------------------------
 pbmc.demo@meta.data %>%
-  tabyl(seurat_annotations, RNA_snn_res.0.8)
+  tabyl(seurat_annotations, RNA_snn_res.0.8) %>%
+  knitr::kable()
 
 g1 <- DimPlot(pbmc.demo,
               reduction = "umap",
@@ -87,7 +104,9 @@ g2 <- DimPlot(pbmc.demo,
 
 g1 | g2
 
+
+# Save --------------------------------------------------------------------
+
 object.size(pbmc.demo) %>% format(units = "Mb")  # 59.5 Mb
 
-# Save
 use_data(pbmc.demo, overwrite = TRUE)
