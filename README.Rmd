@@ -31,11 +31,11 @@ We can ensure all the necessary prerequisites are met via
 ```{r, eval=FALSE}
 if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
 
-pacman::p_load( Seurat, SingleR, celldex )
+pacman::p_load(Seurat, SingleR, celldex)
 
-pacman::p_load_gh("prabhakarlab/RCAv2")
-pacman::p_load_gh("JinmiaoChenLab/DISCOtoolkit")
 pacman::p_load_gh("satijalab/Azimuth")
+pacman::p_load_gh("prabhakarlab/RCAv2")
+pacman::p_load_gh("lmw123/DISCOtoolkit")
 ```
 
 Next, you can install AnnotateCells:
