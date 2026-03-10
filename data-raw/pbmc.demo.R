@@ -7,7 +7,7 @@ options(timeout=600)
 SeuratData::InstallData("pbmc3k")
 pbmc.demo <- SeuratData::LoadData("pbmc3k")
 
-pbmc.demo$orig.ident <- NULL
+pbmc.demo <- UpdateSeuratObject(pbmc.demo)
 
 pbmc.demo   # 2700 cells
 object.size(pbmc.demo) %>% format(units = "Mb")  # 53.9 Mb
@@ -29,8 +29,14 @@ pbmc.demo <- subset(pbmc.demo,
                       nFeature_RNA < 2500 &
                       percent.mt   < 5)
 
-pbmc.demo # 2638 cells after QC
 
+## genes expressed in at least 5 cells
+nsample <- rowSums( GetAssayData(pbmc.demo, layer = "counts") > 0 )
+table(nsample)
+pbmc.demo <- pbmc.demo[ which(nsample >= 5), ]
+
+
+pbmc.demo # 12519 genes x 2638 cells after QC
 
 
 # Tabulate the author annotations -----------------------------------------
@@ -55,6 +61,9 @@ pbmc.demo@meta.data %>%
 
 # Preprocess the data -----------------------------------------------------
 
+identical( GetAssayData(pbmc.demo, layer = "counts"),
+           GetAssayData(pbmc.demo, layer = "data") )
+
 pbmc.demo <- pbmc.demo %>%
   NormalizeData(verbose = FALSE) %>%
   FindVariableFeatures(verbose = FALSE) %>%
@@ -65,9 +74,8 @@ pbmc.demo[["RNA"]]$scale.data <- NULL
 
 
 # Determine the dimensionality of the data
-ElbowPlot(pbmc.demo)
+ElbowPlot(pbmc.demo, ndims = 50)
 ndims <- 10
-
 
 # Run UMAP
 pbmc.demo <- RunUMAP(pbmc.demo, dims = 1:ndims)
@@ -80,9 +88,8 @@ pbmc.demo <- FindNeighbors(pbmc.demo, dims = 1:ndims)
 pbmc.demo <- FindClusters (pbmc.demo, res = 0.8)
 pbmc.demo$seurat_clusters <- NULL
 
-pbmc.demo$RNA_snn_res.0.8 <-
-  formatC( as.numeric(pbmc.demo$RNA_snn_res.0.8),
-         format = "d", flag = "0", digits = 1 ) %>%
+pbmc.demo$RNA_snn_res.0.8 <- pbmc.demo$RNA_snn_res.0.8 %>%
+  str_pad(width = 2, pad = "0") %>%
   paste0("C", .)
 
 
@@ -108,6 +115,6 @@ g1 | g2
 
 # Save --------------------------------------------------------------------
 
-object.size(pbmc.demo) %>% format(units = "Mb")  # 59.5 Mb
+object.size(pbmc.demo) %>% format(units = "Mb")  # 59.4 Mb
 
 usethis::use_data(pbmc.demo, overwrite = TRUE)

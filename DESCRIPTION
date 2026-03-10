@@ -7,18 +7,24 @@ Authors@R:
     c(person(given   = "Adaikalavan", 
              family  = "Ramasamy",
              role    = c("aut", "cre"),
-             email   = "adai@gis.a-star.edu.sg",
+             email   = "adai@a-star.edu.sg",
              comment = c(ORCID = "0000-0002-7598-2892")),
       person(given   = "Gokce",
              family  = "Oguz",
              role    = c("aut"),
-             email   = "gokce_oguz@gis.a-star.edu.sg",
+             email   = "gokce_oguz@a-star.edu.sg",
              comment = c(ORCID = "0000-0003-1044-7204")))
 License: GPL-3
 Encoding: UTF-8
-Depends: R(>= 4.0.1), Seurat (>= 5.0.0), tidyverse (>= 2.0.0)
-Imports: RCAv2, DISCOtoolkit, Azimuth, SingleR, celldex
+Depends: R (>= 4.0.1)
+Imports: Seurat (>= 5.0.0),
+    dplyr,
+    RCAv2,
+    DISCOtoolkit,
+    Azimuth,
+    SingleR,
+    celldex
 RoxygenNote: 7.3.2
 URL: https://github.com/adairama/AnnotateCells
-BugReports: https://github.com/adairama/AnnotateCell/issues
+BugReports: https://github.com/adairama/AnnotateCells/issues
 LazyData: true
