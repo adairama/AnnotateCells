@@ -148,7 +148,7 @@ DISCO_data <- function(type = c("data", "deg")){
 
     ## Download
     tryCatch({
-      link <- paste0( getOption("disco_url"), "/toolkit/getRef" )
+      link <- paste0( getOption("disco_url"), "toolkit/getRef" )
       if(type == "deg") link <- paste0(link, "Deg")
 
       con <- curl::curl(link)

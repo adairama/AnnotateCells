@@ -31,7 +31,7 @@ We can ensure all the necessary prerequisites are met via
 ```{r, eval=FALSE}
 if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
 
-pacman::p_load(Seurat, SingleR, celldex)
+pacman::p_load(Seurat, SingleR, celldex, tidyverse)
 
 pacman::p_load_gh("satijalab/Azimuth")
 pacman::p_load_gh("prabhakarlab/RCAv2")
@@ -49,9 +49,13 @@ pacman::p_load_gh("adairama/AnnotateCells")
 
 We will load the `pbmc.demo` dataset. This is a Seurat object containing 2,635 peripheral blood mononuclear cells (PBMC) from 10X Genomics experiment. This is the same dataset used in the fundamental Seurat vignette after QC filtering with PCA and UMAP embedding. See `help(pbmc.demo)` for more details.
 
+First we load the required packages:
 ```{r dataset}
-library(AnnotateCells)
+pacman::p_load(tidyverse, Seurat, AnnotateCells)
+```
 
+
+```{r}
 data(pbmc.demo)
 
 pbmc.demo

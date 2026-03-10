@@ -15,3 +15,6 @@ data(pbmc.demo)
 pbmc.demo@meta.data %>% head()
 
 pred <- AnnotateCells(pbmc.demo, "RCAv2.GlobalPanel_CellTypes")
+
+pred <- AnnotateCells(pbmc.demo, "DISCO.all")
+
