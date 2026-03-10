@@ -71,7 +71,8 @@ pbmc.demo
 ```{r}
 pbmc.demo@meta.data %>% head()
 
-table(pbmc.demo$seurat_annotations, pbmc.demo$RNA_snn_res.0.8) # luxury since we know the groundtruth
+# Note: this is a luxury since we have a ground truth
+table(pbmc.demo$seurat_annotations, pbmc.demo$RNA_snn_res.0.8) 
 ```
 
 # Available panels
