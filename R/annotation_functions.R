@@ -96,6 +96,8 @@ RCA_project <- function(obj, panel.name = NULL, ...){
 
 RCAv2_annotate <- function(obj, panel.name, ...){
 
+  require(RCAv2)
+
   if( panel.name == "GlobalPanel" ) {
 
     proj <- cbind(
@@ -127,6 +129,8 @@ RCAv2_annotate <- function(obj, panel.name, ...){
 #' @return For `type = "data"`, a matrix of weights, where rows are genes and columns are panels. For `type = "deg"`, a dataframe listing the genes involved in each panel.
 #' @export
 DISCO_data <- function(type = c("data", "deg")){
+
+  require(DISCOtoolkit)
 
   ref_path <- file.path( pacman::p_path("AnnotateCells"), "data" )
 
