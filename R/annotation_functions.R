@@ -1,5 +1,3 @@
-cat0 <- function(...) cat(..., sep = "")
-
 #' Prepare the query and reference data for annotation
 #'
 #' @description Extracts the data assay from a Seurat object and
@@ -22,6 +20,7 @@ data_for_annotation <- function(obj, panel.data, min.express = 0, verbose = TRUE
   if(verbose) cat0( nrow(query), " genes in query dataset.\n" )
 
   ## Filter for genes expressed in at least min.express percent of samples
+  if(!between(min.express, 0, 1)) stop("`min.express` must be between 0 and 1.")
   query <- query[ which(Matrix::rowMeans(query > 0) >= min.express), ]
   if(verbose) cat0( nrow(query), " genes detected in at least ", 100*min.express, "% of the samples.\n" )
 
@@ -205,10 +204,48 @@ DISCO_annotate <- function(obj, panel.name = "all", assay = "RNA", ...){
 }
 
 
+#' Returns the pruned labels from SingleR
+#'
+#' @param obj A Seurat object
+#' @param panel.name Reference panel. Run `celldex::listReferences()` to see available panels.
+#' @param version Currently fixed to "2024-02-26" and can be updated if there are new releases.
+#' @param label Either `label.main`, `label.fine` or `label.ont`. If NULL, it will revert to label.main
+#' @param ...
+#'
+#' @return A data frame that returns the `pruned.labels` column of SingleR
+#' @export
+#'
+#' @examples
+SingleR_annotate <- function(obj, panel.name, version = "2024-02-26", label = NULL, ...){
+
+  label <- ifelse(is.null(label), "label.main", label)
+  stopifnot( label %in% c("label.main", "label.fine", "label.ont") )
+
+  ref.se <- celldex::fetchReference(panel.name, version, realize.assays = TRUE)
+
+  if( suppressWarnings( isEmpty( GetAssayData(obj, layer = "scale.data") ) ) ){
+    obj <- obj %>% ScaleData(verbose = FALSE)
+  }
+
+  suppressMessages(
+    pred <- SingleR::SingleR(test = as.SingleCellExperiment(obj),
+                             ref  = ref.se,
+                             labels = colData(ref.se)[ , label])
+  )
+
+  ## Return the pruned labels
+  pred <- pred %>% data.frame() %>% select(pruned.labels)
+  colnames(pred) <- paste0("SingleR.", panel.name)
+  return(pred)
+
+}
+
+
 #' A wrapper function to call various single-cell annotation tools.
 #'
 #' @param obj A Seurat object
 #' @param tool.panel A combination of "toolname.panelname"
+#' @param label Only used for SingleR too. Values are either `label.main`, `label.fine` or `label.ont`. If NULL, it will revert to label.main
 #' @param ... Optional parameters
 #'
 #' @return A data frame with the predicted cell types
@@ -218,7 +255,10 @@ DISCO_annotate <- function(obj, panel.name = "all", assay = "RNA", ...){
 #' data(pbmc.demo)
 #' out <- AnnotateCells( pbmc.demo, "RCAv2.GlobalPanel_CellTypes" )
 #'
-AnnotateCells <- function(obj, tool.panel, ...){
+AnnotateCells <- function(obj, tool.panel, label = NULL, ...){
+
+  require(dplyr)
+  require(stringr)
 
   ## Check the inputs
   if( !isClass(obj, "Seurat") )
@@ -232,9 +272,11 @@ AnnotateCells <- function(obj, tool.panel, ...){
   panel.name  <- str_split_i(tool.panel, pattern = "\\.", i = 2)
 
   out <- switch(tool.name,
-                RCAv2 = RCAv2_annotate(obj, panel.name),
-                DISCO = DISCO_annotate(obj, panel.name),
-                stop("Unknown tool.name: ", tool.name)
+                RCAv2   = RCAv2_annotate(obj, panel.name, ...),
+                DISCO   = DISCO_annotate(obj, panel.name, ...),
+                SingleR = SingleR_annotate(obj, panel.name,
+                                           label = label, ...),
+                stop(tool.name, "not available.")
   )
 
   return(out)

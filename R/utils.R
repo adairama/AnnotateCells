@@ -1,3 +1,5 @@
+cat0 <- function(...) cat(..., sep = "")
+
 #' Visualize results from one-vs-rest output of FindAllMarkers
 #'
 #' @param results Output from FindAllMarkers

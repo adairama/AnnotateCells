@@ -1,11 +1,11 @@
 #' Demo dataset prepared from the PBMC3k
 #'
 #' The famous PBMC3k dataset used in the main Seurat tutorial
-#' after quality control filtering and after standard preprocessing:
+#' after quality control filtering, gene filtering and after standard preprocessing (see data_raw/pbmc.demo.R script):
 #' log normalization, highly variable genes, scaling, PCA and UMAP.
 #' The dimensionality of the data was set to 10 from Elbow plot inspection.
 #'
-#' @format A Seurat object with 13,714 genes and 2,635 cells. The meta data slot contains:
+#' @format A Seurat object with 12,519 genes and 2,635 cells. The meta data slot contains:
 #' \describe{
 #'   \item{nCount_RNA}{Number of UMIs for each cell}
 #'   \item{nFeature_RNA}{Number of genes detected for each cell}
