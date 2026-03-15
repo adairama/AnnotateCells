@@ -81,15 +81,20 @@ table(pbmc.demo$seurat_annotations, pbmc.demo$RNA_snn_res.0.8)
 
 # Available tools and panels
 
-
 <details>
-<summary>Click to expand available tools and panels</summary>
-```{r, echo = FALSE}
-data("allpanels_summary")
-knitr::kable(allpanels_summary)
-```
+<summary>Click to expand to see available tools and panels</summary>
 
+```{r, echo = FALSE}
+data(allpanels_summary)
+knitr::kable(allpanels_summary %>% select(-cell_type) %>% unique())
+head(allpanels_summary)
+```
 </details>
+
+
+[Full list of available tools, panels and cell types.](man/summary_all_panels.md).
+
+
 
 ```{r, echo = FALSE}
 # data("allpanels_summary")

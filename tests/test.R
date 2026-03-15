@@ -15,6 +15,7 @@ rm(list = ls())
 
 # Load data ---------------------------------------------------------------
 data(pbmc.demo)
+pbmc.demo  # 12519 genex x 2638 cells
 pbmc.demo@meta.data %>% head()
 
 
@@ -22,9 +23,23 @@ pbmc.demo@meta.data %>% head()
 # Run prediction on selected panels ---------------------------------------
 pred1 <- AnnotateCells(pbmc.demo, "RCAv2.GlobalPanel_CellTypes")
 pred2 <- AnnotateCells(pbmc.demo, "DISCO.all")
-pred3 <- AnnotateCells(pbmc.demo, "SingleR.hpca")
+pred3 <- AnnotateCells(pbmc.demo, "SingleR.hpca.fine")
 
+data(pbmc.demo)
+pred      <- AnnotateCells(pbmc.demo, "SingleR.hpca.fine")
+pbmc.demo <- AddMetaData(pbmc.demo, pred)
 
+align_prediction_to_clusterv3(
+  pbmc.demo$RCAv2.GlobalPanel_CellTypes,
+  pbmc.demo$RNA_snn_res.0.8,
+  text.size = 5
+)
+
+align_prediction_to_clusterv3(
+  pbmc.demo$SingleR.hpca.fine,
+  pbmc.demo$RNA_snn_res.0.8,
+  type = "long.all"
+) %>% print(n = Inf)
 
 pbmc.demo@meta.data %>%
   count(seurat_annotations, RCAv2.GlobalPanel_CellTypes) %>%

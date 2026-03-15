@@ -93,5 +93,14 @@ allpanels_summary %>%
 # SingleR  7 0.1206897
 
 
+
+# Write to a markdown -----------------------------------------------------
+knitr::kable(allpanels_summary, format = "markdown") %>%
+  writeLines("man/summary_all_panels.md")
+
+
 # Save --------------------------------------------------------------------
 use_data(allpanels_summary, overwrite = TRUE, compress = "xz")
+
+
+summary_all_panels.md

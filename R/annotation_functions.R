@@ -235,8 +235,13 @@ SingleR_annotate <- function(obj, panel.name, version = "2024-02-26", label = NA
   )
 
   ## Return the pruned labels
-  pred <- pred %>% data.frame() %>% select(pruned.labels)
-  colnames(pred) <- paste0("SingleR.", panel.name)
+  pred <- pred %>%
+    data.frame() %>%
+    select(y = pruned.labels) %>%
+    mutate(y = ifelse(is.na(y), "Unassigned", y))
+
+  colnames(pred) <- paste0("SingleR.", panel.name,
+                           gsub("label", "", label) )
   return(pred)
 
 }
