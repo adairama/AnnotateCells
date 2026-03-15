@@ -9,6 +9,12 @@ Authors@R:
              role    = c("aut", "cre"),
              email   = "adai@a-star.edu.sg",
              comment = c(ORCID = "0000-0002-7598-2892")),
+      
+      person(given   = "Jin Ker, Nigel", 
+             family  = "Ho",
+             role    = c("ctb"),
+             email   = "e0957325@u.nus.edu",
+             
       person(given   = "Gokce",
              family  = "Oguz",
              role    = c("aut"),
