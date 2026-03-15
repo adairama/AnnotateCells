@@ -52,18 +52,13 @@ pacman::p_load_gh("adairama/AnnotateCells")
 
 We will load the `pbmc.demo` dataset. This is a Seurat object containing 2,635 peripheral blood mononuclear cells (PBMC) from 10X Genomics experiment. This is the same dataset used in the fundamental Seurat vignette after QC filtering with PCA and UMAP embedding. See `help(pbmc.demo)` for more details.
 
-First we load the required packages:
+First we load the required packages and demo dataset.
 ```{r dataset}
 pacman::p_load(tidyverse, Seurat, AnnotateCells)
-```
 
-
-```{r}
 data(pbmc.demo)
-
 pbmc.demo
 ```
-
 
 `pbmc.demo` includes two relevant columns in meta.data:
 
@@ -86,30 +81,19 @@ table(pbmc.demo$seurat_annotations, pbmc.demo$RNA_snn_res.0.8)
 
 ```{r, echo = FALSE}
 data(allpanels_summary)
-knitr::kable(allpanels_summary %>% select(-cell_type) %>% unique())
+knitr::kable(allpanels_summary %>% select(-cell_type) %>% unique() %>% remove_rownames())
 head(allpanels_summary)
 ```
 </details>
 
 
-[Full list of available tools, panels and cell types.](man/summary_all_panels.md).
+[Full list of available tools, panels with the cell types.](https://github.com/adairama/AnnotateCells/blob/main/man/summary_all_panels.md).
 
 
-
-```{r, echo = FALSE}
-# data("allpanels_summary")
-# 
-# DT::datatable(allpanels_summary, 
-#               filter = 'top', 
-#               options = list(pageLength = 25, autoWidth = TRUE)
-#              )
-```
+Note: `DISCO.all` is also a valid combo, and it will annotate against all available DISCO panels listed in the table above.
 
 
-DISCO.all is a valid combo, and it will annotate against all available DISCO panels listed in the table above.
-
-
-**References**
+# General reference for tools and panels used here
 
 - RCAv2: 
 [Manuscript](https://doi.org/10.1093/nar/gkab632),
@@ -183,7 +167,7 @@ The `align_prediction_to_cluster()` function provides a convenient way to visual
 
 You can also the size of the annotation labels using `text.size` (2 by default).
 
-```{r, eval = FALSE}
+```{r}
 lapply(to_test, function(combo){
   
   align_prediction_to_cluster(
