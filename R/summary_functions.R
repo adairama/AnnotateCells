@@ -26,7 +26,7 @@ align_prediction_to_cluster <- function(prediction,
 
   ## Count
   cts <- data.frame(prediction, cluster) %>%
-    count(cluster, prediction) %>%
+    dplyr::count(cluster, prediction) %>%
     arrange(cluster, desc(n)) %>%
     group_by(cluster) %>%
     mutate(prop    = n / sum(n),
