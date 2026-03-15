@@ -75,14 +75,33 @@ pbmc.demo@meta.data %>% head()
 table(pbmc.demo$seurat_annotations, pbmc.demo$RNA_snn_res.0.8) 
 ```
 
-# Available panels
+
+# Available tools and panels
 
 dt
 
 
+References
+
+- RCAv2: 
+[Manuscript](https://doi.org/10.1093/nar/gkab632),
+[GitHub](https://github.com/prabhakarlab/RCAv2)
+
+- DISCO: 
+[Manuscript](https://doi.org/10.1093/nar/gkab1020),
+[DISCOtoolkit](https://github.com/JinmiaoChenLab/DISCOtoolkit),
+[DISCO database](https://www.immunesinglecell.com/),
+[Implementation website](https://www.immunesinglecell.com/tool/cellid)
+
+- SingleR: 
+[Manuscript](https://doi.org/10.1038/s41590-018-0276-y),
+[Package](https://doi.org/doi:10.18129/B9.bioc.SingleR),
+[celldex package for database](https://doi.org/doi:10.18129/B9.bioc.celldex)
+
+
 # Run RCAv2 annotation
 
-Here is an example on how to run the RCAv2 tool with the GlobalPanel_CellTypes panel and add the results to the meta data.
+You can run the RCAv2 tool with the `GlobalPanel_CellTypes` panel. Then add the results to the meta data.
 
 ```{r}
 pred <- AnnotateCells(pbmc.demo, "RCAv2.GlobalPanel_CellTypes")
