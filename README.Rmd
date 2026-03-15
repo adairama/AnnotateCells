@@ -55,13 +55,14 @@ pacman::p_load_gh("adairama/AnnotateCells")
 <summary>Click to expand available tools and panels</summary>
 
 ```{r, echo = FALSE}
+pacman::p_load(tidyverse)
 data(allpanels_summary)
 knitr::kable(allpanels_summary %>% select(-cell_type) %>% unique() %>% remove_rownames())
 ```
 
 </details>
 
-For the full list including cell types, see [summary_all_panels.md](man/summary_all_panels.md).
+For the full list including cell types, see [summary_all_panels.md](https://github.com/adairama/AnnotateCells/blob/main/man/summary_all_panels.md).
 
 Note: `DISCO.all` is also a valid `combo` argument, which annotates against all available DISCO panels listed in the table above.
 
