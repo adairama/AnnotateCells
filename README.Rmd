@@ -7,7 +7,7 @@ output: github_document
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>",
+  comment  = "#>",
   fig.path = "man/figures/README-",
   out.width  = "100%",
   out.height = "100%",
@@ -20,18 +20,19 @@ options(width = 160)
 
 # AnnotateCells
 
-Cell type identification remains a key challenge in single-cell RNA-seq and spatial transcriptomics datasets despite a decade of research in this area.
+[![R-CMD-check](https://github.com/adairama/AnnotateCells/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/adairama/AnnotateCells/actions)
+[![License: GPL-3](https://img.shields.io/badge/License-GPL--3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-There are many reference-based annotation tools to help with cell type annotation. However, the input and output formats differ greatly, increasing the burden on users to use and compare multiple tools. 
+Cell type identification remains a key challenge in single-cell RNA-seq and spatial transcriptomics. While many reference-based annotation tools exist, their input and output formats differ greatly, making it cumbersome to run and compare multiple tools.
 
-This package `AnnotateCells` aims to provide a unified wrapper to run several annotation tools conveniently.
+`AnnotateCells` provides a unified wrapper to run **RCAv2**, **DISCO**, **SingleR**, and **Azimuth** with a single function call, returning consistently formatted outputs that can be directly added to your Seurat object's metadata.
 
 
 # Installation
 
-We can ensure all the necessary prerequisites are met via
+Install the required dependencies first:
 
-```{r, eval=FALSE}
+```{r, eval = FALSE}
 if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
 
 pacman::p_load(Seurat, SingleR, celldex, tidyverse)
@@ -41,18 +42,60 @@ pacman::p_load_gh("prabhakarlab/RCAv2")
 pacman::p_load_gh("lmw123/DISCOtoolkit")
 ```
 
-Finally, you can install AnnotateCells:
+Then install `AnnotateCells`:
 
-```{r, eval=FALSE}
+```{r, eval = FALSE}
 pacman::p_load_gh("adairama/AnnotateCells")
 ```
 
 
+# Available tools and panels
+
+<details>
+<summary>Click to expand available tools and panels</summary>
+
+```{r, echo = FALSE}
+data(allpanels_summary)
+knitr::kable(allpanels_summary %>% select(-cell_type) %>% unique() %>% remove_rownames())
+```
+
+</details>
+
+For the full list including cell types, see [summary_all_panels.md](man/summary_all_panels.md).
+
+Note: `DISCO.all` is also a valid `combo` argument, which annotates against all available DISCO panels listed in the table above.
+
+**References**
+
+- RCAv2:
+[Manuscript](https://doi.org/10.1093/nar/gkab632),
+[GitHub](https://github.com/prabhakarlab/RCAv2)
+
+- DISCO:
+[Manuscript](https://doi.org/10.1093/nar/gkab1020),
+[DISCOtoolkit](https://github.com/JinmiaoChenLab/DISCOtoolkit),
+[DISCO database](https://www.immunesinglecell.com/),
+[Implementation website](https://www.immunesinglecell.com/tool/cellid)
+
+- SingleR:
+[Manuscript](https://doi.org/10.1038/s41590-018-0276-y),
+[Package](https://doi.org/doi:10.18129/B9.bioc.SingleR),
+[celldex package for database](https://doi.org/doi:10.18129/B9.bioc.celldex)
+
+
+# Notes on annotation
+
+1. The first DISCO annotation run triggers a one-time download of reference data (~175 MB) from the DISCO website, which may take up to 5 minutes. Once downloaded, the data is cached in the `AnnotateCells` package data directory and reused automatically in subsequent runs.
+
+2. DISCO generates predictions at the group level, defined by `Idents()`. These group-level predictions are automatically expanded to the cell level to ensure consistency with other annotation tools in the package.
+
+3. For SingleR, the `combo` argument may be suffixed with `.main`, `.fine`, or `.ont` (e.g. `"SingleR.hpca.main"`, `"SingleR.hpca.fine"`). Entries without a suffix default to `.main` (e.g. `"SingleR.hpca"` → `"SingleR.hpca.main"`).
+
+
 # Demo dataset
 
-We will load the `pbmc.demo` dataset. This is a Seurat object containing 2,635 peripheral blood mononuclear cells (PBMC) from 10X Genomics experiment. This is the same dataset used in the fundamental Seurat vignette after QC filtering with PCA and UMAP embedding. See `help(pbmc.demo)` for more details.
+Load the required packages and the `pbmc.demo` dataset:
 
-First we load the required packages and demo dataset.
 ```{r dataset}
 pacman::p_load(tidyverse, Seurat, AnnotateCells)
 
@@ -60,60 +103,24 @@ data(pbmc.demo)
 pbmc.demo
 ```
 
-`pbmc.demo` includes two relevant columns in meta.data:
+`pbmc.demo` is a Seurat object containing 2,635 peripheral blood mononuclear cells (PBMC) from a 10X Genomics experiment — the same dataset used in the standard Seurat vignette after QC filtering, with PCA and UMAP embeddings precomputed. See `help(pbmc.demo)` for more details.
 
-- `seurat_annotations`: author-provided cell type labels, used here as ground truth for evaluating annotation accuracy
+Two columns in `meta.data` are relevant here:
 
-- `RNA_snn_res.0.8`: cluster assignments generated by the Louvain algorithm at a resolution of 0.8, yielding 11 clusters which we will try to annotate
+- `seurat_annotations`: author-provided cell type labels, used as ground truth for evaluating annotation accuracy
+- `RNA_snn_res.0.8`: cluster assignments from the Louvain algorithm at resolution 0.8, yielding 11 clusters (C00–C10) to be annotated
 
 ```{r}
 pbmc.demo@meta.data %>% head()
 
-# Note: this is a luxury since we have a ground truth
-table(pbmc.demo$seurat_annotations, pbmc.demo$RNA_snn_res.0.8) 
+# Cross-tabulation of ground truth labels vs clusters
+table(pbmc.demo$seurat_annotations, pbmc.demo$RNA_snn_res.0.8)
 ```
-
-
-# Available tools and panels
-
-<details>
-<summary>Click to expand to see available tools and panels</summary>
-
-```{r, echo = FALSE}
-data(allpanels_summary)
-knitr::kable(allpanels_summary %>% select(-cell_type) %>% unique() %>% remove_rownames())
-head(allpanels_summary)
-```
-</details>
-
-
-[Full list of available tools, panels with the cell types.](https://github.com/adairama/AnnotateCells/blob/main/man/summary_all_panels.md).
-
-
-Note: `DISCO.all` is also a valid combo, and it will annotate against all available DISCO panels listed in the table above.
-
-
-# General reference for tools and panels used here
-
-- RCAv2: 
-[Manuscript](https://doi.org/10.1093/nar/gkab632),
-[GitHub](https://github.com/prabhakarlab/RCAv2)
-
-- DISCO: 
-[Manuscript](https://doi.org/10.1093/nar/gkab1020),
-[DISCOtoolkit](https://github.com/JinmiaoChenLab/DISCOtoolkit),
-[DISCO database](https://www.immunesinglecell.com/),
-[Implementation website](https://www.immunesinglecell.com/tool/cellid)
-
-- SingleR: 
-[Manuscript](https://doi.org/10.1038/s41590-018-0276-y),
-[Package](https://doi.org/doi:10.18129/B9.bioc.SingleR),
-[celldex package for database](https://doi.org/doi:10.18129/B9.bioc.celldex)
 
 
 # Running one tool at a time
 
-You can run the RCAv2 tool with the `GlobalPanel_CellTypes` panel. Then add the results to the meta data.
+Pass a `"tool.panel"` string to `AnnotateCells()` to generate cell-level predictions, then add the result to your Seurat object's metadata:
 
 ```{r}
 pred <- AnnotateCells(pbmc.demo, "RCAv2.GlobalPanel_CellTypes")
@@ -123,67 +130,47 @@ head(pred)
 pbmc.demo <- AddMetaData(pbmc.demo, pred)
 ```
 
-# Running multiples tools simultaneously
+
+# Running multiple tools simultaneously
+
+Supply a vector of `"tool.panel"` combinations to run several tools at once:
 
 ```{r}
-# Specify the tool.panel combination to test
 to_test <- c("RCAv2.GlobalPanel_CellTypes",
              "DISCO.all",
              "SingleR.hpca.fine")
 
-# Run tools and combine the results
 preds <- lapply(to_test, AnnotateCells, obj = pbmc.demo)
 preds <- do.call(cbind, preds)
 head(preds)
 
-# Add back to metadata
 pbmc.demo <- AddMetaData(pbmc.demo, preds)
 ```
 
 
-# Notes on annotation
+# Aligning predictions from cell-level to cluster-level
 
-1. The first DISCO annotation run triggers a one-time download of reference data (~175 MB) from the DISCO website, which may take up to 5 minutes. Once downloaded, the data is cached in the `AnnotateCells` package data directory and reused automatically in subsequent runs.
-
-2. DISCO generates predictions at the group level, defined by the `Idents()`. These group-level predictions are automatically expanded to the cell level to ensure consistency with other annotation tools in the package.
-
-3. For SingleR, the combo argument may be suffixed with `.main`, `.fine`, or `.ont` (e.g. "SingleR.hpca.main", "SingleR.hpca.fine"). Entries without a suffix default to `.main` (e.g. "SingleR.hpca" $\rightarrow$ "SingleR.hpca.main").
-
-
-# Aligning annotation from cell-level to group-level
-
-The tools considered here (except DISCO) generate predictions at the individual cell level. While useful, aligning these cell-level labels to cluster groups provide a broader perspective. 
-
-However, a single cluster may contain multiple predicted cell types, as shown in the cross-tabulation below, which complicates matters.
+The tools above (except DISCO) generate predictions at the individual cell level. Aligning these to cluster groups provides a broader perspective, but a single cluster may contain multiple predicted cell types:
 
 ```{r}
-table( pbmc.demo$RCAv2.GlobalPanel_CellTypes,
-       pbmc.demo$RNA_snn_res.0.8 ) %>% 
+table(pbmc.demo$RCAv2.GlobalPanel_CellTypes,
+      pbmc.demo$RNA_snn_res.0.8) %>%
   print(zero.print = ".")
 ```
 
-
-The `align_prediction_to_cluster()` function provides a convenient way to visualize annotation results at the cluster level. For each cluster, cell type labels are displayed as a stacked barplot, ordered by frequency in descending order until a cumulative threshold (default: 70%) is reached. Labels falling below this threshold are grouped into a "Misc." category and shown in grey. The threshold can be adjusted via the `thres` parameter.
-
-You can also the size of the annotation labels using `text.size` (2 by default).
+The `align_prediction_to_cluster()` function visualizes this as a stacked barplot. For each cluster, cell type labels are ordered by frequency (highest at the left) until a cumulative threshold is reached (default: 70%). Labels below the threshold are collapsed into a grey "Misc." bar. Adjust the threshold with `thres` and label size with `text.size` (default: 2).
 
 ```{r}
-lapply(to_test, function(combo){
-  
+lapply(to_test, function(combo) {
   align_prediction_to_cluster(
-    prediction = pbmc.demo@meta.data[ , combo],
+    prediction = pbmc.demo@meta.data[, combo],
     cluster    = pbmc.demo$RNA_snn_res.0.8,
     text.size  = 3
   ) + labs(title = combo)
 })
 ```
 
-```{r, echo = FALSE}
-#knitr::include_graphics("man/figures/RCAv2_align.png")
-```
-
-
-You can also return the output as text output using "split", "long" or "long.all". For example:
+The function also supports text output formats via the `type` argument (`"split"`, `"long"`, or `"long.all"`):
 
 ```{r}
 align_prediction_to_cluster(
