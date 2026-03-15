@@ -216,9 +216,9 @@ DISCO_annotate <- function(obj, panel.name = "all", assay = "RNA", ...){
 #' @export
 #'
 #' @examples
-SingleR_annotate <- function(obj, panel.name, version = "2024-02-26", label = NULL, ...){
+SingleR_annotate <- function(obj, panel.name, version = "2024-02-26", label = NA, ...){
 
-  label <- ifelse(is.null(label), "label.main", label)
+  label <- ifelse(is.na(label), "label.main", label)
   stopifnot( label %in% c("label.main", "label.fine", "label.ont") )
 
   ref.se <- celldex::fetchReference(panel.name, version, realize.assays = TRUE)
@@ -255,7 +255,7 @@ SingleR_annotate <- function(obj, panel.name, version = "2024-02-26", label = NU
 #' data(pbmc.demo)
 #' out <- AnnotateCells( pbmc.demo, "RCAv2.GlobalPanel_CellTypes" )
 #'
-AnnotateCells <- function(obj, tool.panel, label = NULL, ...){
+AnnotateCells <- function(obj, combo, label = NULL, ...){
 
   require(dplyr)
   require(stringr)
@@ -268,14 +268,16 @@ AnnotateCells <- function(obj, tool.panel, label = NULL, ...){
                 GetAssayData(obj, layer = "data" ) ) )
     warning("The data layer does not appear to be normalized. Please check.")
 
-  tool.name   <- str_split_i(tool.panel, pattern = "\\.", i = 1)
-  panel.name  <- str_split_i(tool.panel, pattern = "\\.", i = 2)
+  tool.name  <- str_split_i(combo, pattern = "\\.", i = 1)
+  panel.name <- str_split_i(combo, pattern = "\\.", i = 2)
+  label.name <- str_split_i(combo, pattern = "\\.", i = 3)
+
 
   out <- switch(tool.name,
                 RCAv2   = RCAv2_annotate(obj, panel.name, ...),
                 DISCO   = DISCO_annotate(obj, panel.name, ...),
                 SingleR = SingleR_annotate(obj, panel.name,
-                                           label = label, ...),
+                                           label = label.name, ...),
                 stop(tool.name, "not available.")
   )
 

@@ -111,7 +111,7 @@ References
   [Package](https://doi.org/doi:10.18129/B9.bioc.SingleR), [celldex
   package for database](https://doi.org/doi:10.18129/B9.bioc.celldex)
 
-# Run RCAv2 annotation
+# Running one tool at a time
 
 You can run the RCAv2 tool with the `GlobalPanel_CellTypes` panel. Then
 add the results to the meta data.
@@ -137,26 +137,22 @@ head(pred)
 pbmc.demo <- AddMetaData(pbmc.demo, pred)
 ```
 
-# Run DISCO annotation
-
-The first time you run the DISCO annotation, the required reference data
-(~175 MB) will be downloaded from the server. This may take a few
-minutes (\< 5 min), depending on your internet speed. The downloaded
-data will be stored in the data directory of the `AnnotateCells` package
-for future use.
+# Running multiples tools simultaneously
 
 ``` r
-pred <- AnnotateCells(pbmc.demo, "DISCO.all")
-#> As of Seurat v5, we recommend using AggregateExpression to perform pseudo-bulk analysis.
-#> Loading reference data from local file...
+# Specify the tool.panel combination to test
+to_test <- c("RCAv2.GlobalPanel_CellTypes",
+             "DISCO.all",
+             "SingleR.hpca")
+
+# Run tools and combine the results
+preds <- lapply(to_test, AnnotateCells, obj = pbmc.demo)
 #> 
-#> Loading reference deg from local file...
-#> 
-#> Loading required package: DISCOtoolkit
-#> 
-#> Welcome to DISCOtoolkit. version 2.0.0
-#> 
-#> This message is displayed once per session.
+#>  GlobalPanel_CellTypes 
+#> 12519 genes in query dataset.
+#> 8883 genes detected in at least 1% of the samples.
+#> 5209 genes in the reference panel.
+#> 1192 genes in common used for projection.
 #> 
 #> 
 #> |Ident |predict_cell_type_1 |source_atlas_1    | score_1|
@@ -172,26 +168,43 @@ pred <- AnnotateCells(pbmc.demo, "DISCO.all")
 #> |5     |CD14 monocyte       |COVID-19_blood    |   0.854|
 #> |9     |Dendritic cell      |HNSCC_blood       |   0.891|
 #> |10    |Megakaryocyte       |sarcoidosis_blood |   0.776|
+preds <- do.call(cbind, preds)
+head(preds)
+#>                 RCAv2.GlobalPanel_CellTypes         DISCO.all SingleR.hpca
+#> AAACATACAACCAC L74_T.Cell_CD4.Centr..Memory   GZMK CD8 T cell      T_cells
+#> AAACATTGAGCTAC       L51_B.Cell_Bone.Marrow      Naive B cell       B_cell
+#> AAACATTGATCAGC L75_T.Cell_CD4.Centr..Memory Memory CD4 T cell      T_cells
+#> AAACCGTGCTTCCG            L60_Monocyte_CD16     CD14 monocyte     Monocyte
+#> AAACCGTGTATGCG           L86_NK.Cell_CD56Lo      CD16 NK cell      NK_cell
+#> AAACGCACTGGTAC L75_T.Cell_CD4.Centr..Memory Memory CD4 T cell      T_cells
 
-head(pred)
-#>                        DISCO.all
-#> AAACATACAACCAC   GZMK CD8 T cell
-#> AAACATTGAGCTAC      Naive B cell
-#> AAACATTGATCAGC Memory CD4 T cell
-#> AAACCGTGCTTCCG     CD14 monocyte
-#> AAACCGTGTATGCG      CD16 NK cell
-#> AAACGCACTGGTAC Memory CD4 T cell
-
-pbmc.demo <- AddMetaData(pbmc.demo, pred)
+# Add back to metadata
+pbmc.demo <- AddMetaData(pbmc.demo, preds)
 ```
+
+# Notes on annotation
+
+1.  The first DISCO annotation run triggers a one-time download of
+    reference data (~175 MB) from the DISCO website, which may take up
+    to 5 minutes. Once downloaded, the data is cached in the
+    `AnnotateCells` package data directory and reused automatically in
+    subsequent runs.
+
+2.  DISCO generates predictions at the group level, defined by the
+    `Idents()`. These group-level predictions are automatically expanded
+    to the cell level to ensure consistency with other annotation tools
+    in the package.
+
+3.  For SingleR tool, you can set the `label` to either “label.main”
+    (default), “label.fine” or “label.ont”.
 
 # Aligning annotation from cell-level to group-level
 
-With the exception of the DISCO reference tool, `AnnotateCells()`
-provides predictions at the individual cell level. Aligning these
-predicted cell type labels to cluster groups can be advantageous.
-However, each cluster may contain multiple prediction labels as the
-cross table below demonstrates,
+With the exception of the DISCO, `AnnotateCells()` generates predictions
+at the individual cell level. While useful, aligning these cell-level
+labels to cluster groups provide a broader perspective. However, a
+single cluster may contain multiple predicted cell types, as shown in
+the cross-tabulation below:
 
 ``` r
 table( pbmc.demo$RCAv2.GlobalPanel_CellTypes,
@@ -228,23 +241,29 @@ table( pbmc.demo$RCAv2.GlobalPanel_CellTypes,
 #>   L93_B.Cell_Plasma.Cell                .   .   3   .   .   .   .   .   .   .   .
 ```
 
-It can be easier to visualize this information (e.g. cluster 3) via the
-following barplot. The segments are ordered in descending order of
-popularity until at least 70% of the cells are accounted for (you can
-adjust this using the `thres` parameter). The remaining labels are
-lumped together as Misc. and colored in grey.
+The `align_prediction_to_cluster()` function provides a convenient way
+to visualize annotation results at the cluster level. For each cluster,
+cell type labels are displayed as a stacked barplot, ordered by
+frequency in descending order until a cumulative threshold (default:
+70%) is reached. Labels falling below this threshold are grouped into a
+“Misc.” category and shown in grey. The threshold can be adjusted via
+the `thres` parameter.
+
+You can also the size of the annotation labels using `text.size` (2 by
+default).
 
 ``` r
 align_prediction_to_cluster(
   prediction = pbmc.demo$RCAv2.GlobalPanel_CellTypes,
-  cluster    = pbmc.demo$RNA_snn_res.0.8 
+  cluster    = pbmc.demo$RNA_snn_res.0.8,
+  text.size  = 3
 )
-#> Warning: Removed 10 rows containing missing values or values outside the scale range (`geom_text()`).
 ```
 
-<img src="man/figures/README-unnamed-chunk-9-1.png" alt="" width="100%" />
+<img src="man/figures/RCAv2_align.png" alt="" width="100%" height="100%" />
 
-Here is an alternative text output:
+You can also return the output as text output using “split”, “long” or
+“long.all”. For example:
 
 ``` r
 align_prediction_to_cluster(
