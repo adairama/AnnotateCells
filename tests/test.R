@@ -25,21 +25,26 @@ pred1 <- AnnotateCells(pbmc.demo, "RCAv2.GlobalPanel_CellTypes")
 pred2 <- AnnotateCells(pbmc.demo, "DISCO.all")
 pred3 <- AnnotateCells(pbmc.demo, "SingleR.hpca.fine")
 
-data(pbmc.demo)
-pred      <- AnnotateCells(pbmc.demo, "SingleR.hpca.fine")
-pbmc.demo <- AddMetaData(pbmc.demo, pred)
+pbmc.demo <- AddMetaData(pbmc.demo, pred2)
 
-align_prediction_to_clusterv3(
+align_prediction_to_cluster(
   pbmc.demo$RCAv2.GlobalPanel_CellTypes,
   pbmc.demo$RNA_snn_res.0.8,
-  text.size = 5
+  text.size = 6
 )
 
-align_prediction_to_clusterv3(
+align_prediction_to_cluster(
+  pbmc.demo$DISCO.all,
+  pbmc.demo$RNA_snn_res.0.8,
+  text.size = 6
+)
+
+
+align_prediction_to_cluster(
   pbmc.demo$SingleR.hpca.fine,
   pbmc.demo$RNA_snn_res.0.8,
-  type = "long.all"
-) %>% print(n = Inf)
+  text.size = 6
+)
 
 pbmc.demo@meta.data %>%
   count(seurat_annotations, RCAv2.GlobalPanel_CellTypes) %>%

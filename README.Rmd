@@ -106,7 +106,7 @@ head(allpanels_summary)
 ```
 
 
-DISCO also accepts "all" as a valid combo argument, which will annotate against all available DISCO panels listed in the table above.
+DISCO.all is a valid combo, and it will annotate against all available DISCO panels listed in the table above.
 
 
 **References**
@@ -168,7 +168,9 @@ pbmc.demo <- AddMetaData(pbmc.demo, preds)
 
 # Aligning annotation from cell-level to group-level
 
-With the exception of the DISCO, `AnnotateCells()` generates predictions at the individual cell level. While useful, aligning these cell-level labels to cluster groups provide a broader perspective. However, a single cluster may contain multiple predicted cell types, as shown in the cross-tabulation below:
+The tools considered here (except DISCO) generate predictions at the individual cell level. While useful, aligning these cell-level labels to cluster groups provide a broader perspective. 
+
+However, a single cluster may contain multiple predicted cell types, as shown in the cross-tabulation below, which complicates matters.
 
 ```{r}
 table( pbmc.demo$RCAv2.GlobalPanel_CellTypes,
@@ -182,15 +184,18 @@ The `align_prediction_to_cluster()` function provides a convenient way to visual
 You can also the size of the annotation labels using `text.size` (2 by default).
 
 ```{r, eval = FALSE}
-align_prediction_to_cluster(
-  prediction = pbmc.demo$RCAv2.GlobalPanel_CellTypes,
-  cluster    = pbmc.demo$RNA_snn_res.0.8,
-  text.size  = 3
-)
+lapply(to_test, function(combo){
+  
+  align_prediction_to_cluster(
+    prediction = pbmc.demo@meta.data[ , combo],
+    cluster    = pbmc.demo$RNA_snn_res.0.8,
+    text.size  = 3
+  ) + labs(title = combo)
+})
 ```
 
 ```{r, echo = FALSE}
-knitr::include_graphics("man/figures/RCAv2_align.png")
+#knitr::include_graphics("man/figures/RCAv2_align.png")
 ```
 
 
