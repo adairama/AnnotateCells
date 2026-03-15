@@ -223,7 +223,7 @@ SingleR_annotate <- function(obj, panel.name, version = "2024-02-26", label = NU
 
   ref.se <- celldex::fetchReference(panel.name, version, realize.assays = TRUE)
 
-  if( suppressWarnings( isEmpty( GetAssayData(obj, layer = "scale.data") ) ) ){
+  if( suppressWarnings( nrow(GetAssayData(obj, layer = "scale.data")) == 0 ) ){
     obj <- obj %>% ScaleData(verbose = FALSE)
   }
 
