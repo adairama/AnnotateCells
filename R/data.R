@@ -10,7 +10,7 @@
 #'   \item{nCount_RNA}{Number of UMIs for each cell}
 #'   \item{nFeature_RNA}{Number of genes detected for each cell}
 #'   \item{percent.mt}{Percentage of reads mapping to mitochondrial genes per cell}
-#'   \item{seurat_annotations}{Cell type annotation provided by authors of Seurat }
+#'   \item{seurat_annotations}{Cell type annotation provided by authors of Seurat}
 #'   \item{RNA_snn_res.0.8}{Communities detected using Louvain algorithm at a resolution 0.8}
 #' }
 #'
