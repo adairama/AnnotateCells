@@ -230,7 +230,7 @@ SingleR_annotate <- function(obj, panel.name, version = "2024-02-26", label = NU
   suppressMessages(
     pred <- SingleR::SingleR(test = as.SingleCellExperiment(obj),
                              ref  = ref.se,
-                             labels = colData(ref.se)[ , label])
+                             labels = SummarizedExperiment::colData(ref.se)[ , label])
   )
 
   ## Return the pruned labels
