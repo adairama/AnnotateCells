@@ -81,10 +81,30 @@ table(pbmc.demo$seurat_annotations, pbmc.demo$RNA_snn_res.0.8)
 
 # Available tools and panels
 
-dt
+
+<details>
+<summary>Click to expand available tools and panels</summary>
+```{r, echo = FALSE}
+data("allpanels_summary")
+knitr::kable(allpanels_summary)
+```
+
+</details>
+
+```{r, echo = FALSE}
+# data("allpanels_summary")
+# 
+# DT::datatable(allpanels_summary, 
+#               filter = 'top', 
+#               options = list(pageLength = 25, autoWidth = TRUE)
+#              )
+```
 
 
-References
+DISCO also accepts "all" as a valid combo argument, which will annotate against all available DISCO panels listed in the table above.
+
+
+**References**
 
 - RCAv2: 
 [Manuscript](https://doi.org/10.1093/nar/gkab632),

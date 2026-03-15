@@ -218,7 +218,8 @@ DISCO_annotate <- function(obj, panel.name = "all", assay = "RNA", ...){
 #' @examples
 SingleR_annotate <- function(obj, panel.name, version = "2024-02-26", label = NA, ...){
 
-  label <- ifelse(is.na(label), "label.main", label)
+  label <- ifelse(is.na(label), "main", label)
+  label <- paste0("label.", label)
   stopifnot( label %in% c("label.main", "label.fine", "label.ont") )
 
   ref.se <- celldex::fetchReference(panel.name, version, realize.assays = TRUE)
