@@ -121,7 +121,7 @@ RCAv2_annotate <- function(obj, panel.name, ...){
 }
 
 
-#' Load or download and load the DISCO reference data and deg
+#' Load or download and load the DISCO reference data and deg (differentially expressed genes)
 #'
 #' @param type data or deg
 #'
