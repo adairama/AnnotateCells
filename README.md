@@ -3,7 +3,6 @@
 
 # AnnotateCells
 
-[![R-CMD-check](https://github.com/adairama/AnnotateCells/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/adairama/AnnotateCells/actions)
 [![License:
 GPL-3](https://img.shields.io/badge/License-GPL--3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
@@ -12,10 +11,10 @@ and spatial transcriptomics. While many reference-based annotation tools
 exist, their input and output formats differ greatly, making it
 cumbersome to run and compare multiple tools.
 
-`AnnotateCells` provides a unified wrapper to run **RCAv2**, **DISCO**,
-**SingleR**, and **Azimuth** with a single function call, returning
-consistently formatted outputs that can be directly added to your Seurat
-object’s metadata.
+`AnnotateCells` provides a unified wrapper to run **RCAv2**, **DISCO**
+and **SingleR** with a single function call, returning consistently
+formatted outputs that can be directly added to your Seurat object’s
+metadata.
 
 # Installation
 
@@ -117,7 +116,7 @@ Click to expand available tools and panels
 </details>
 
 For the full list including cell types, see
-[summary_all_panels.md](man/summary_all_panels.md).
+[summary_all_panels.md](https://github.com/adairama/AnnotateCells/blob/main/man/summary_all_panels.md).
 
 Note: `DISCO.all` is also a valid `combo` argument, which annotates
 against all available DISCO panels listed in the table above.
@@ -208,49 +207,27 @@ table(pbmc.demo$seurat_annotations, pbmc.demo$RNA_snn_res.0.8)
 #>   Platelet       0   0   0   0   0   0   0   0   0   0  14
 ```
 
-# Running one tool at a time
+# Running the tool
 
-Pass a `"tool.panel"` string to `AnnotateCells()` to generate cell-level
-predictions, then add the result to your Seurat object’s metadata:
+Pass a vector of `"tool.panel"` string to `AnnotateCells()` to generate
+cell-level predictions
 
 ``` r
-pred <- AnnotateCells(pbmc.demo, "RCAv2.GlobalPanel_CellTypes")
+chosen_panels <- c("RCAv2.GlobalPanel_CellTypes",
+                   "DISCO.all",
+                   "SingleR.hpca.fine")
+
+preds <- AnnotateCells(pbmc.demo, chosen_panels)
+#> 
+#>  RCAv2.GlobalPanel_CellTypes
 #> 
 #>  GlobalPanel_CellTypes 
 #> 12519 genes in query dataset.
 #> 8883 genes detected in at least 1% of the samples.
 #> 5209 genes in the reference panel.
 #> 1192 genes in common used for projection.
-
-head(pred)
-#>                 RCAv2.GlobalPanel_CellTypes
-#> AAACATACAACCAC L74_T.Cell_CD4.Centr..Memory
-#> AAACATTGAGCTAC       L51_B.Cell_Bone.Marrow
-#> AAACATTGATCAGC L75_T.Cell_CD4.Centr..Memory
-#> AAACCGTGCTTCCG            L60_Monocyte_CD16
-#> AAACCGTGTATGCG           L86_NK.Cell_CD56Lo
-#> AAACGCACTGGTAC L75_T.Cell_CD4.Centr..Memory
-
-pbmc.demo <- AddMetaData(pbmc.demo, pred)
-```
-
-# Running multiple tools simultaneously
-
-Supply a vector of `"tool.panel"` combinations to run several tools at
-once:
-
-``` r
-to_test <- c("RCAv2.GlobalPanel_CellTypes",
-             "DISCO.all",
-             "SingleR.hpca.fine")
-
-preds <- lapply(to_test, AnnotateCells, obj = pbmc.demo)
 #> 
-#>  GlobalPanel_CellTypes 
-#> 12519 genes in query dataset.
-#> 8883 genes detected in at least 1% of the samples.
-#> 5209 genes in the reference panel.
-#> 1192 genes in common used for projection.
+#>  DISCO.all
 #> 
 #> 
 #> |Ident |predict_cell_type_1 |source_atlas_1    | score_1|
@@ -266,7 +243,9 @@ preds <- lapply(to_test, AnnotateCells, obj = pbmc.demo)
 #> |5     |CD14 monocyte       |COVID-19_blood    |   0.854|
 #> |9     |Dendritic cell      |HNSCC_blood       |   0.891|
 #> |10    |Megakaryocyte       |sarcoidosis_blood |   0.776|
-preds <- do.call(cbind, preds)
+#> 
+#>  SingleR.hpca.fine
+
 head(preds)
 #>                 RCAv2.GlobalPanel_CellTypes         DISCO.all           SingleR.hpca.fine
 #> AAACATACAACCAC L74_T.Cell_CD4.Centr..Memory   GZMK CD8 T cell  T_cell:CD4+_central_memory
@@ -275,7 +254,11 @@ head(preds)
 #> AAACCGTGCTTCCG            L60_Monocyte_CD16     CD14 monocyte              Monocyte:CD16-
 #> AAACCGTGTATGCG           L86_NK.Cell_CD56Lo      CD16 NK cell                     NK_cell
 #> AAACGCACTGGTAC L75_T.Cell_CD4.Centr..Memory Memory CD4 T cell T_cell:CD4+_effector_memory
+```
 
+Then add the result to your Seurat object’s metadata:
+
+``` r
 pbmc.demo <- AddMetaData(pbmc.demo, preds)
 ```
 
@@ -329,7 +312,7 @@ frequency (highest at the left) until a cumulative threshold is reached
 `text.size` (default: 2).
 
 ``` r
-lapply(to_test, function(combo) {
+lapply(chosen_panels, function(combo) {
   align_prediction_to_cluster(
     prediction = pbmc.demo@meta.data[, combo],
     cluster    = pbmc.demo$RNA_snn_res.0.8,

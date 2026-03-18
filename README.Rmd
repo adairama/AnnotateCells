@@ -129,7 +129,7 @@ chosen_panels <- c("RCAv2.GlobalPanel_CellTypes",
 
 preds <- AnnotateCells(pbmc.demo, chosen_panels)
 
-head(pred)
+head(preds)
 ```
 
 Then add the result to your Seurat object's metadata:
