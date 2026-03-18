@@ -7,7 +7,6 @@
 # pacman::p_load_gh("adairama/AnnotateCells")
 
 
-
 # Setup -------------------------------------------------------------------
 pacman::p_load(tidyverse, Seurat, AnnotateCells)
 rm(list = ls())
@@ -27,8 +26,17 @@ chosen_panels <- c("RCAv2.GlobalPanel_CellTypes",
 
 preds <- AnnotateCells(pbmc.demo, chosen_panels)
 
+pbmc.demo <- AddMetaData(pbmc.demo, preds)
 
-pbmc.demo <- AddMetaData(pbmc.demo, pred2)
+
+lapply(to_test, function(combo) {
+  align_prediction_to_cluster(
+    prediction = norm@meta.data[, combo],
+    cluster    = norm$cluster,
+    text.size  = 3
+  ) + labs(title = combo)
+})
+
 
 align_prediction_to_cluster(
   pbmc.demo$RCAv2.GlobalPanel_CellTypes,

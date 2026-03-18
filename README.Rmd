@@ -24,7 +24,7 @@ options(width = 160)
 
 Cell type identification remains a key challenge in single-cell RNA-seq and spatial transcriptomics. While many reference-based annotation tools exist, their input and output formats differ greatly, making it cumbersome to run and compare multiple tools.
 
-`AnnotateCells` provides a unified wrapper to run **RCAv2**, **DISCO**, **SingleR**, and **Azimuth** with a single function call, returning consistently formatted outputs that can be directly added to your Seurat object's metadata.
+`AnnotateCells` provides a unified wrapper to run **RCAv2**, **DISCO** and **SingleR** with a single function call, returning consistently formatted outputs that can be directly added to your Seurat object's metadata.
 
 
 # Installation
@@ -118,32 +118,23 @@ table(pbmc.demo$seurat_annotations, pbmc.demo$RNA_snn_res.0.8)
 ```
 
 
-# Running one tool at a time
+# Running the tool
 
-Pass a `"tool.panel"` string to `AnnotateCells()` to generate cell-level predictions, then add the result to your Seurat object's metadata:
+Pass a vector of `"tool.panel"` string to `AnnotateCells()` to generate cell-level predictions
 
 ```{r}
-pred <- AnnotateCells(pbmc.demo, "RCAv2.GlobalPanel_CellTypes")
+chosen_panels <- c("RCAv2.GlobalPanel_CellTypes",
+                   "DISCO.all",
+                   "SingleR.hpca.fine")
+
+preds <- AnnotateCells(pbmc.demo, chosen_panels)
 
 head(pred)
-
-pbmc.demo <- AddMetaData(pbmc.demo, pred)
 ```
 
-
-# Running multiple tools simultaneously
-
-Supply a vector of `"tool.panel"` combinations to run several tools at once:
+Then add the result to your Seurat object's metadata:
 
 ```{r}
-to_test <- c("RCAv2.GlobalPanel_CellTypes",
-             "DISCO.all",
-             "SingleR.hpca.fine")
-
-preds <- lapply(to_test, AnnotateCells, obj = pbmc.demo)
-preds <- do.call(cbind, preds)
-head(preds)
-
 pbmc.demo <- AddMetaData(pbmc.demo, preds)
 ```
 
@@ -161,7 +152,7 @@ table(pbmc.demo$RCAv2.GlobalPanel_CellTypes,
 The `align_prediction_to_cluster()` function visualizes this as a stacked barplot. For each cluster, cell type labels are ordered by frequency (highest at the left) until a cumulative threshold is reached (default: 70%). Labels below the threshold are collapsed into a grey "Misc." bar. Adjust the threshold with `thres` and label size with `text.size` (default: 2).
 
 ```{r}
-lapply(to_test, function(combo) {
+lapply(chosen_panels, function(combo) {
   align_prediction_to_cluster(
     prediction = pbmc.demo@meta.data[, combo],
     cluster    = pbmc.demo$RNA_snn_res.0.8,
