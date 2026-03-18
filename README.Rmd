@@ -20,7 +20,6 @@ options(width = 160)
 
 # AnnotateCells
 
-[![R-CMD-check](https://github.com/adairama/AnnotateCells/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/adairama/AnnotateCells/actions)
 [![License: GPL-3](https://img.shields.io/badge/License-GPL--3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 Cell type identification remains a key challenge in single-cell RNA-seq and spatial transcriptomics. While many reference-based annotation tools exist, their input and output formats differ greatly, making it cumbersome to run and compare multiple tools.

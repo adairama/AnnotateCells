@@ -21,9 +21,12 @@ pbmc.demo@meta.data %>% head()
 
 
 # Run prediction on selected panels ---------------------------------------
-pred1 <- AnnotateCells(pbmc.demo, "RCAv2.GlobalPanel_CellTypes")
-pred2 <- AnnotateCells(pbmc.demo, "DISCO.all")
-pred3 <- AnnotateCells(pbmc.demo, "SingleR.hpca.fine")
+chosen_panels <- c("RCAv2.GlobalPanel_CellTypes",
+                   "DISCO.all",
+                   "SingleR.hpca.fine")
+
+preds <- AnnotateCells(pbmc.demo, chosen_panels)
+
 
 pbmc.demo <- AddMetaData(pbmc.demo, pred2)
 

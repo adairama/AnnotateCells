@@ -247,10 +247,10 @@ SingleR_annotate <- function(obj, panel.name, version = "2024-02-26", label = NA
 }
 
 
-#' A wrapper function to call various single-cell annotation tools.
+#' A wrapper function to call one annotation tools.
 #'
 #' @param obj A Seurat object
-#' @param tool.panel A combination of "toolname.panelname"
+#' @param combo combination of "toolname.panelname"
 #' @param label Only used for SingleR too. Values are either `label.main`, `label.fine` or `label.ont`. If NULL, it will revert to label.main
 #' @param ... Optional parameters
 #'
@@ -261,7 +261,41 @@ SingleR_annotate <- function(obj, panel.name, version = "2024-02-26", label = NA
 #' data(pbmc.demo)
 #' out <- AnnotateCells( pbmc.demo, "RCAv2.GlobalPanel_CellTypes" )
 #'
-AnnotateCells <- function(obj, combo, label = NULL, ...){
+AnnotateCells_internal <- function(obj, combo, label = NULL, ...){
+
+  cat("\n", combo)
+
+  tool.name  <- str_split_i(combo, pattern = "\\.", i = 1)
+  panel.name <- str_split_i(combo, pattern = "\\.", i = 2)
+  label.name <- str_split_i(combo, pattern = "\\.", i = 3)
+
+  out <- switch(tool.name,
+                RCAv2   = RCAv2_annotate(obj, panel.name, ...),
+                DISCO   = DISCO_annotate(obj, panel.name, ...),
+                SingleR = SingleR_annotate(obj, panel.name,
+                                           label = label.name, ...),
+                stop(tool.name, "not available.")
+  )
+
+  return(out)
+}
+
+
+#' A wrapper function to call multiple annotation tools.
+#'
+#' @param obj A Seurat object
+#' @param combos Combinations of "toolname.panelname"
+#' @param label Only used for SingleR too. Values are either `label.main`, `label.fine` or `label.ont`. If NULL, it will revert to label.main
+#' @param ... Optional parameters
+#'
+#' @return A data frame with the predicted cell types
+#' @export
+#'
+#' @examples
+#' data(pbmc.demo)
+#' out <- AnnotateCells( pbmc.demo, "RCAv2.GlobalPanel_CellTypes" )
+#'
+AnnotateCells <- function(obj, combos, label = NULL, ...){
 
   require(dplyr)
   require(stringr)
@@ -274,18 +308,9 @@ AnnotateCells <- function(obj, combo, label = NULL, ...){
                 GetAssayData(obj, layer = "data" ) ) )
     warning("The data layer does not appear to be normalized. Please check.")
 
-  tool.name  <- str_split_i(combo, pattern = "\\.", i = 1)
-  panel.name <- str_split_i(combo, pattern = "\\.", i = 2)
-  label.name <- str_split_i(combo, pattern = "\\.", i = 3)
+  ## Call the internal function iteratively
+  preds <- lapply(combos, AnnotateCells_internal, obj = obj)
+  preds <- do.call(cbind, preds)
 
-
-  out <- switch(tool.name,
-                RCAv2   = RCAv2_annotate(obj, panel.name, ...),
-                DISCO   = DISCO_annotate(obj, panel.name, ...),
-                SingleR = SingleR_annotate(obj, panel.name,
-                                           label = label.name, ...),
-                stop(tool.name, "not available.")
-  )
-
-  return(out)
+  return(preds)
 }
