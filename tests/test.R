@@ -29,6 +29,8 @@ preds <- AnnotateCells(pbmc.demo, chosen_panels)
 pbmc.demo <- AddMetaData(pbmc.demo, preds)
 
 
+# Visualize the cell level prediction to cluster --------------------------
+
 lapply(to_test, function(combo) {
   align_prediction_to_cluster(
     prediction = norm@meta.data[, combo],
@@ -36,26 +38,6 @@ lapply(to_test, function(combo) {
     text.size  = 3
   ) + labs(title = combo)
 })
-
-
-align_prediction_to_cluster(
-  pbmc.demo$RCAv2.GlobalPanel_CellTypes,
-  pbmc.demo$RNA_snn_res.0.8,
-  text.size = 6
-)
-
-align_prediction_to_cluster(
-  pbmc.demo$DISCO.all,
-  pbmc.demo$RNA_snn_res.0.8,
-  text.size = 6
-)
-
-
-align_prediction_to_cluster(
-  pbmc.demo$SingleR.hpca.fine,
-  pbmc.demo$RNA_snn_res.0.8,
-  text.size = 6
-)
 
 pbmc.demo@meta.data %>%
   count(seurat_annotations, RCAv2.GlobalPanel_CellTypes) %>%
