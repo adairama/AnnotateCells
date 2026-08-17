@@ -216,6 +216,9 @@ Pass a vector of `"tool.panel"` string to `AnnotateCells()` to generate
 cell-level predictions
 
 ``` r
+pacman::p_load(tidyverse, Seurat, AnnotateCells)
+data(pbmc.demo)
+
 chosen_panels <- c("RCAv2.GlobalPanel_CellTypes",
                    "DISCO.all",
                    "SingleR.hpca.fine")
