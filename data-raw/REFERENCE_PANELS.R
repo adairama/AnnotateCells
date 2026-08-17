@@ -18,26 +18,26 @@ levs <- c("GlobalPanel_CellTypes", "GlobalPanel_Tissues",
           "MonacoPanel", "MonacoBCellPanel", "MonacoMonoPanel", "MonacoTCellPanel",
           "NovershternPanel", "NovershternTCellPanel", "ZhangMouseBrainPanel")
 
-RCAv2_summary <- lapply(RCA_panels, colnames) %>%
-  stack() %>%
-  dplyr::rename(cell_type = values, panel = ind) %>%
-  mutate(tool = "RCAv2", panel = factor(panel, levels = levs)) %>%
-  arrange(tool, panel) %>%
-  mutate(panel = as.character(panel)) %>%
+RCAv2_summary <- lapply(RCA_panels, colnames) |>
+  stack() |>
+  dplyr::rename(cell_type = values, panel = ind) |>
+  mutate(tool = "RCAv2", panel = factor(panel, levels = levs)) |>
+  arrange(tool, panel) |>
+  mutate(panel = as.character(panel)) |>
   select(tool, panel, cell_type)
 
 rm(RCA_panels)
 
-RCAv2_summary %>% pull(panel) %>% unique() %>% length()
+RCAv2_summary |> pull(panel) |> unique() |> length()
 
 
 ## DISCO -------------------------------------------------------------------
 
-DISCO_summary <- DISCO_data("data") %>%
-  colnames() %>%
-  data.frame(tmp = .) %>%
-  mutate(tool = "DISCO") %>%
-  separate(tmp, c("cell_type", "panel"), sep = "--") %>%
+DISCO_summary <- DISCO_data("data") |>
+  colnames() |>
+  data.frame(tmp = .) |>
+  mutate(tool = "DISCO") |>
+  separate(tmp, c("cell_type", "panel"), sep = "--") |>
   select(tool, panel, cell_type)
 
 
@@ -50,8 +50,8 @@ SingleR_fine_summary <- NULL
 
 for(ref in listReferences()){
 
-  panel <- fetchReference(ref, "2024-02-26") %>%
-    colData() %>%
+  panel <- fetchReference(ref, "2024-02-26") |>
+    colData() |>
     data.frame()
 
   SingleR_main_summary <- bind_rows(
@@ -59,7 +59,7 @@ for(ref in listReferences()){
     data.frame(
       tool  = "SingleR",
       panel = paste0(ref, ".main"),
-      cell_type = panel$label.main %>% unique() %>% sort())
+      cell_type = panel$label.main |> unique() |> sort())
   )
 
   SingleR_fine_summary <- bind_rows(
@@ -67,7 +67,7 @@ for(ref in listReferences()){
     data.frame(
       tool  = "SingleR",
       panel = paste0(ref, ".fine"),
-      cell_type = panel$label.fine %>% unique() %>% sort())
+      cell_type = panel$label.fine |> unique() |> sort())
   )
 
 }
@@ -82,10 +82,10 @@ allpanels_summary <- bind_rows(RCAv2_summary,
 
 dim(allpanels_summary)      # 2194 combinations
 
-allpanels_summary %>%
-  select(tool, panel) %>%
-  unique() %>%
-  filter(!grepl(".fine$", panel)) %>%
+allpanels_summary |>
+  select(tool, panel) |>
+  unique() |>
+  filter(!grepl(".fine$", panel)) |>
   tabyl(tool)
 #    tool  n   percent
 #   DISCO 39 0.6724138
@@ -95,7 +95,7 @@ allpanels_summary %>%
 
 
 # Write to a markdown -----------------------------------------------------
-knitr::kable(allpanels_summary, format = "markdown") %>%
+knitr::kable(allpanels_summary, format = "markdown") |>
   writeLines("man/summary_all_panels.md")
 
 

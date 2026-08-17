@@ -23,26 +23,26 @@ plot_top_DE <- function(results,
   if( order.by == "pct.diff" ){
 
     if( "pct.diff" %in% colnames(results) ){
-      results <- results %>% mutate(score = pct.diff)
+      results <- results |> mutate(score = pct.diff)
     } else {
       warning("pct.diff not detected. Calculating pct.diff = pct.1 - pct.2")
-      results <- results %>% mutate(score = pct.1 - pct.2)
+      results <- results |> mutate(score = pct.1 - pct.2)
     }
   }
 
   if( order.by == "avg_log2FC" ){
-    results <- results %>% mutate(score = avg_log2FC)
+    results <- results |> mutate(score = avg_log2FC)
   }
 
   if(is.null(nrow)){
-    nrow <- results %>% distinct(cluster) %>% nrow() %>% sqrt() %>% ceiling()
+    nrow <- results |> distinct(cluster) |> nrow() |> sqrt() |> ceiling()
   }
 
   ## Extract the top genes
-  top <- results %>%
-    group_by(cluster) %>%
-    slice_max(score, n = n) %>%
-    arrange(cluster, desc(score)) %>%
+  top <- results |>
+    group_by(cluster) |>
+    slice_max(score, n = n) |>
+    arrange(cluster, desc(score)) |>
     mutate(rank = rank(-score))
 
   ## Visualization

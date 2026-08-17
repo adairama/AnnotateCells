@@ -165,9 +165,43 @@ table(pbmc.demo$RCAv2.GlobalPanel_CellTypes,
   print(zero.print = ".")
 ```
 
+```{r, echo = FALSE, eval = FALSE}
+png("man/figures/align_RCAv2_cluster.png", width = 480*1.5, height = 480*1.5)
+align_prediction_to_cluster(
+  prediction = pbmc.demo$RCAv2.GlobalPanel_CellTypes,
+  cluster    = pbmc.demo$RNA_snn_res.0.8,
+  text.size  = 5) + 
+  labs(title = "RCAv2.GlobalPanel_CellTypes")
+dev.off()
+
+png("man/figures/align_DISCO.all_cluster.png", width = 480*1.5, height = 480*1.5)
+align_prediction_to_cluster(
+  prediction = pbmc.demo$DISCO.all,
+  cluster    = pbmc.demo$RNA_snn_res.0.8,
+  text.size  = 5) + 
+  labs(title = "DISCO.all")
+dev.off()
+
+png("man/figures/align_SingleR.hpca.fine_cluster.png", width = 480*1.5, height = 480*1.5)
+align_prediction_to_cluster(
+  prediction = pbmc.demo$SingleR.hpca.fine,
+  cluster    = pbmc.demo$RNA_snn_res.0.8,
+  text.size  = 5) + 
+  labs(title = "SingleR.hpca.fine")
+dev.off()
+
+png("man/figures/align_SingleR.hpca.fine_DISCO.all.png", width = 480*1.5, height = 480*1.5)
+align_prediction_to_cluster(
+  prediction = pbmc.demo$SingleR.hpca.fine,
+  cluster    = pbmc.demo$DISCO.all,
+  text.size  = 5) + 
+  labs(title = "SingleR.hpca.fine vs DISCO.all")
+dev.off()
+```
+
 The `align_prediction_to_cluster()` function visualizes this as a stacked barplot. For each cluster, cell type labels are ordered by frequency (highest at the left) until a cumulative threshold is reached (default: 70%). Labels below the threshold are collapsed into a grey "Misc." bar. Adjust the threshold with `thres` and label size with `text.size` (default: 2).
 
-```{r}
+```{r, eval = FALSE}
 align_prediction_to_cluster(
   prediction = pbmc.demo$RCAv2.GlobalPanel_CellTypes,
   cluster    = pbmc.demo$RNA_snn_res.0.8,
@@ -175,7 +209,12 @@ align_prediction_to_cluster(
   labs(title = "RCAv2.GlobalPanel_CellTypes")
 ```
 
-```{r}
+```{r, echo = FALSE}
+knitr::include_graphics("man/figures/align_RCAv2_cluster.png")
+```
+
+
+```{r, eval = FALSE}
 align_prediction_to_cluster(
   prediction = pbmc.demo$DISCO.all,
   cluster    = pbmc.demo$RNA_snn_res.0.8,
@@ -183,7 +222,13 @@ align_prediction_to_cluster(
   labs(title = "DISCO.all")
 ```
 
-```{r}
+
+```{r, echo = FALSE}
+knitr::include_graphics("man/figures/align_DISCO.all_cluster.png")
+```
+
+
+```{r, eval = FALSE}
 align_prediction_to_cluster(
   prediction = pbmc.demo$SingleR.hpca.fine,
   cluster    = pbmc.demo$RNA_snn_res.0.8,
@@ -191,15 +236,25 @@ align_prediction_to_cluster(
   labs(title = "SingleR.hpca.fine")
 ```
 
+```{r, echo = FALSE}
+knitr::include_graphics("man/figures/align_SingleR.hpca.fine_cluster.png")
+```
+
+
 You can also use this function to look at the agreement between two prediction tools directly.
 
-```{r}
+```{r, eval = FALSE}
 align_prediction_to_cluster(
   prediction = pbmc.demo$SingleR.hpca.fine,
   cluster    = pbmc.demo$DISCO.all,
   text.size  = 3) + 
   labs(title = "SingleR.hpca.fine vs DISCO.all")
 ```
+
+```{r, echo = FALSE}
+knitr::include_graphics("man/figures/align_SingleR.hpca.fine_DISCO.all.png")
+```
+
 
 The function also supports text output formats via the `type` argument (`"split"`, `"long"`, or `"long.all"`):
 

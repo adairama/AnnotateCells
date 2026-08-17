@@ -28,25 +28,25 @@ align_prediction_to_cluster <- function(prediction, cluster, thres = 0.7,
   if (!between(thres, 0, 1)) stop("`thres` should be between 0 and 1.")
 
 
-  cts <- data.frame(prediction, cluster) %>%
-    dplyr::count(cluster, prediction) %>%
-    arrange(cluster, desc(n)) %>%
-    group_by(cluster) %>%
+  cts <- data.frame(prediction, cluster) |>
+    dplyr::count(cluster, prediction) |>
+    arrange(cluster, desc(n)) |>
+    group_by(cluster) |>
     mutate(prop = n / sum(n), cumprop = cumsum(prop))
 
   if (type == "long.all") return(cts)
 
-  top_prediction <- cts %>%
+  top_prediction <- cts |>
     filter(cumprop <= thres | dplyr::lag(cumprop, default = 0) < thres)
 
   misc <- anti_join(cts,
-                    top_prediction %>% select(cluster, prediction),
-                    by = c("cluster", "prediction")) %>%
-    summarize(n = sum(n), prop = sum(prop)) %>%
+                    top_prediction |> select(cluster, prediction),
+                    by = c("cluster", "prediction")) |>
+    summarize(n = sum(n), prop = sum(prop)) |>
     mutate(prediction = "Misc.", cumprop = 1)
 
 
-  out <- bind_rows(top_prediction, misc) %>%
+  out <- bind_rows(top_prediction, misc) |>
     arrange(cluster, cumprop)
 
   rm(cts, top_prediction, misc)
@@ -54,7 +54,7 @@ align_prediction_to_cluster <- function(prediction, cluster, thres = 0.7,
 
   if (type == "long")  return(out)
 
-  if (type == "split") return(split(out %>% as.data.frame(), out$cluster))
+  if (type == "split") return(split(out |> as.data.frame(), out$cluster))
 
 
   if (type == "plot") {
@@ -66,11 +66,11 @@ align_prediction_to_cluster <- function(prediction, cluster, thres = 0.7,
                                     paste0(names(tb), " (n=", tb, ")"))
 
     # Sort by prop descending within each cluster, Misc. always last
-    out_sorted <- out %>%
-      group_by(cluster2) %>%
-      mutate(prediction = ifelse(prediction == "Misc.", "Misc.", prediction)) %>%
-      arrange(cluster2, prediction == "Misc.", desc(prop), .by_group = TRUE) %>%
-      mutate(stack_order = row_number()) %>%
+    out_sorted <- out |>
+      group_by(cluster2) |>
+      mutate(prediction = ifelse(prediction == "Misc.", "Misc.", prediction)) |>
+      arrange(cluster2, prediction == "Misc.", desc(prop), .by_group = TRUE) |>
+      mutate(stack_order = row_number()) |>
       ungroup()
 
     g <- ggplot(out_sorted, aes(x = prop, y = cluster2, fill = prediction)) +
@@ -93,8 +93,8 @@ align_prediction_to_cluster <- function(prediction, cluster, thres = 0.7,
       theme(legend.position = "none",
             axis.text = element_text(size = 12, face = "bold"))
 
-    cols <- ggplot_build(g)$data[[3]] %>%
-      distinct(label, fill) %>%
+    cols <- ggplot_build(g)$data[[3]] |>
+      distinct(label, fill) |>
       deframe()
 
     cols["Misc."] <- "#D3D3D3"

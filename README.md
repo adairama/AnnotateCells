@@ -335,7 +335,7 @@ align_prediction_to_cluster(
   labs(title = "RCAv2.GlobalPanel_CellTypes")
 ```
 
-<img src="man/figures/README-unnamed-chunk-10-1.png" alt="" width="100%" height="100%" />
+<img src="man/figures/align_RCAv2_cluster.png" alt="" width="100%" height="100%" />
 
 ``` r
 align_prediction_to_cluster(
@@ -345,7 +345,7 @@ align_prediction_to_cluster(
   labs(title = "DISCO.all")
 ```
 
-<img src="man/figures/README-unnamed-chunk-11-1.png" alt="" width="100%" height="100%" />
+<img src="man/figures/align_DISCO.all_cluster.png" alt="" width="100%" height="100%" />
 
 ``` r
 align_prediction_to_cluster(
@@ -355,7 +355,7 @@ align_prediction_to_cluster(
   labs(title = "SingleR.hpca.fine")
 ```
 
-<img src="man/figures/README-unnamed-chunk-12-1.png" alt="" width="100%" height="100%" />
+<img src="man/figures/align_SingleR.hpca.fine_cluster.png" alt="" width="100%" height="100%" />
 
 You can also use this function to look at the agreement between two
 prediction tools directly.
@@ -368,7 +368,7 @@ align_prediction_to_cluster(
   labs(title = "SingleR.hpca.fine vs DISCO.all")
 ```
 
-<img src="man/figures/README-unnamed-chunk-13-1.png" alt="" width="100%" height="100%" />
+<img src="man/figures/align_SingleR.hpca.fine_DISCO.all.png" alt="" width="100%" height="100%" />
 
 The function also supports text output formats via the `type` argument
 (`"split"`, `"long"`, or `"long.all"`):

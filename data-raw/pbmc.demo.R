@@ -10,12 +10,12 @@ pbmc.demo <- SeuratData::LoadData("pbmc3k")
 pbmc.demo <- UpdateSeuratObject(pbmc.demo)
 
 pbmc.demo   # 2700 cells
-object.size(pbmc.demo) %>% format(units = "Mb")  # 53.9 Mb
+object.size(pbmc.demo) |> format(units = "Mb")  # 53.9 Mb
 
 
 # QC and Filter -----------------------------------------------------------
 
-pbmc.demo$percent.mt <- PercentageFeatureSet(pbmc.demo, pattern = "^MT-|^Mt-") %>%
+pbmc.demo$percent.mt <- PercentageFeatureSet(pbmc.demo, pattern = "^MT-|^Mt-") |>
   round(digits = 2)
 
 pbmc.demo@meta.data  <- relocate(pbmc.demo@meta.data,
@@ -41,8 +41,8 @@ pbmc.demo # 12519 genes x 2638 cells after QC
 
 # Tabulate the author annotations -----------------------------------------
 
-pbmc.demo@meta.data %>%
-  tabyl(seurat_annotations) %>%
+pbmc.demo@meta.data |>
+  tabyl(seurat_annotations) |>
   knitr::kable()
 
 #   |seurat_annotations |   n|   percent|
@@ -64,10 +64,10 @@ pbmc.demo@meta.data %>%
 identical( GetAssayData(pbmc.demo, layer = "counts"),
            GetAssayData(pbmc.demo, layer = "data") )
 
-pbmc.demo <- pbmc.demo %>%
-  NormalizeData(verbose = FALSE) %>%
-  FindVariableFeatures(verbose = FALSE) %>%
-  ScaleData(verbose = FALSE) %>%
+pbmc.demo <- pbmc.demo |>
+  NormalizeData(verbose = FALSE) |>
+  FindVariableFeatures(verbose = FALSE) |>
+  ScaleData(verbose = FALSE) |>
   RunPCA(verbose = FALSE)
 
 pbmc.demo[["RNA"]]$scale.data <- NULL
@@ -88,14 +88,14 @@ pbmc.demo <- FindNeighbors(pbmc.demo, dims = 1:ndims)
 pbmc.demo <- FindClusters (pbmc.demo, res = 0.8)
 pbmc.demo$seurat_clusters <- NULL
 
-pbmc.demo$RNA_snn_res.0.8 <- pbmc.demo$RNA_snn_res.0.8 %>%
-  str_pad(width = 2, pad = "0") %>%
+pbmc.demo$RNA_snn_res.0.8 <- pbmc.demo$RNA_snn_res.0.8 |>
+  str_pad(width = 2, pad = "0") |>
   paste0("C", .)
 
 
 # Crosstab with ground truth ----------------------------------------------
-pbmc.demo@meta.data %>%
-  tabyl(seurat_annotations, RNA_snn_res.0.8) %>%
+pbmc.demo@meta.data |>
+  tabyl(seurat_annotations, RNA_snn_res.0.8) |>
   knitr::kable()
 
 g1 <- DimPlot(pbmc.demo,
@@ -115,6 +115,6 @@ g1 | g2
 
 # Save --------------------------------------------------------------------
 
-object.size(pbmc.demo) %>% format(units = "Mb")  # 59.4 Mb
+object.size(pbmc.demo) |> format(units = "Mb")  # 59.4 Mb
 
 usethis::use_data(pbmc.demo, overwrite = TRUE)
