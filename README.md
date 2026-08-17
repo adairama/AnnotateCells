@@ -135,23 +135,26 @@ against all available DISCO panels listed in the table above.
   [Package](https://doi.org/doi:10.18129/B9.bioc.SingleR), [celldex
   package for database](https://doi.org/doi:10.18129/B9.bioc.celldex)
 
-# Notes on annotation
+# Notes on Annotation tools
 
-1.  The first DISCO annotation run triggers a one-time download of
-    reference data (~175 MB) from the DISCO website, which may take up
-    to 5 minutes. Once downloaded, the data is cached in the
-    `AnnotateCells` package data directory and reused automatically in
-    subsequent runs.
-
-2.  DISCO generates predictions at the group level, defined by
-    `Idents()`. These group-level predictions are automatically expanded
-    to the cell level to ensure consistency with other annotation tools
-    in the package.
-
-3.  For SingleR, the `combo` argument may be suffixed with `.main`,
-    `.fine`, or `.ont` (e.g. `"SingleR.hpca.main"`,
+1.  **SingleR**: The `combo` argument may be suffixed with `.main`,
+    `.fine`, or `.ont` (e.g., `"SingleR.hpca.main"`,
     `"SingleR.hpca.fine"`). Entries without a suffix default to `.main`
-    (e.g. `"SingleR.hpca"` → `"SingleR.hpca.main"`).
+    (e.g., `"SingleR.hpca"` maps to `"SingleR.hpca.main"`).
+
+2.  **DISCO**: DISCO generates predictions at the group level as defined
+    by `Idents()`. These predictions are automatically expanded to the
+    cell level to ensure consistency with other annotation tools in this
+    package.
+
+3.  **DISCO (Online Server & Local Caching)**: By default, DISCO sends
+    queries to an online server for prediction. You can choose to use a
+    locally cached version by setting
+    `AnnotateCells(..., local = TRUE)`. This triggers a one-time
+    download of reference data (\< 300 MB) from the DISCO website, which
+    may take up to 5 minutes. Once downloaded, the data is saved in a
+    hidden folder `.disco_cache` in the `Documents` (Windows OS) or
+    `$HOME` (Linux/macOS) and automatically reused in subsequent runs.
 
 # Demo dataset
 
@@ -183,7 +186,7 @@ Two columns in `meta.data` are relevant here:
   resolution 0.8, yielding 11 clusters (C00–C10) to be annotated
 
 ``` r
-pbmc.demo@meta.data %>% head()
+pbmc.demo@meta.data |> head()
 #>                nCount_RNA nFeature_RNA percent.mt seurat_annotations RNA_snn_res.0.8
 #> AAACATACAACCAC       2419          779       3.02       Memory CD4 T             C06
 #> AAACATTGAGCTAC       4903         1352       3.79                  B             C02
@@ -230,28 +233,28 @@ preds <- AnnotateCells(pbmc.demo, chosen_panels)
 #>  DISCO.all
 #> 
 #> 
-#> |Ident |predict_cell_type_1 |source_atlas_1    | score_1|
-#> |:-----|:-------------------|:-----------------|-------:|
-#> |6     |GZMK CD8 T cell     |sarcoidosis_blood |   0.844|
-#> |2     |Naive B cell        |sarcoidosis_blood |   0.838|
-#> |1     |Memory CD4 T cell   |sarcoidosis_blood |   0.934|
-#> |3     |CD14 monocyte       |COVID-19_blood    |   0.830|
-#> |8     |CD16 NK cell        |bone_marrow       |   0.837|
-#> |4     |Memory CD8 T cell   |dengue_blood      |   0.795|
-#> |7     |CD16 monocyte       |HNSCC_blood       |   0.864|
-#> |0     |Naive CD4 T cell    |HNSCC_blood       |   0.966|
-#> |5     |CD14 monocyte       |COVID-19_blood    |   0.854|
-#> |9     |Dendritic cell      |HNSCC_blood       |   0.891|
-#> |10    |Megakaryocyte       |sarcoidosis_blood |   0.776|
+#> |cluster |predicted_cell_type |atlas          | score|
+#> |:-------|:-------------------|:--------------|-----:|
+#> |1       |Naive CD4 T cell    |HNSCC_blood    | 0.884|
+#> |2       |Memory CD4 T cell   |HNSCC_blood    | 0.872|
+#> |3       |Memory B cell       |HNSCC_blood    | 0.866|
+#> |4       |CD16 monocyte       |HNSCC_blood    | 0.818|
+#> |5       |GZMB CD8 T cell     |HNSCC_blood    | 0.853|
+#> |6       |CD14 monocyte       |COVID-19_blood | 0.808|
+#> |7       |Memory CD4 T cell   |HNSCC_blood    | 0.872|
+#> |8       |CD16 monocyte       |HNSCC_blood    | 0.884|
+#> |9       |CD16 NK cell        |HNSCC_blood    | 0.869|
+#> |10      |Dendritic cell      |HNSCC_blood    | 0.847|
+#> |11      |Megakaryocyte       |dengue_blood   | 0.689|
 #> 
 #>  SingleR.hpca.fine
 
 head(preds)
 #>                 RCAv2.GlobalPanel_CellTypes         DISCO.all           SingleR.hpca.fine
-#> AAACATACAACCAC L74_T.Cell_CD4.Centr..Memory   GZMK CD8 T cell  T_cell:CD4+_central_memory
-#> AAACATTGAGCTAC       L51_B.Cell_Bone.Marrow      Naive B cell             B_cell:immature
+#> AAACATACAACCAC L74_T.Cell_CD4.Centr..Memory Memory CD4 T cell  T_cell:CD4+_central_memory
+#> AAACATTGAGCTAC       L51_B.Cell_Bone.Marrow     Memory B cell             B_cell:immature
 #> AAACATTGATCAGC L75_T.Cell_CD4.Centr..Memory Memory CD4 T cell  T_cell:CD4+_central_memory
-#> AAACCGTGCTTCCG            L60_Monocyte_CD16     CD14 monocyte              Monocyte:CD16-
+#> AAACCGTGCTTCCG            L60_Monocyte_CD16     CD16 monocyte              Monocyte:CD16-
 #> AAACCGTGTATGCG           L86_NK.Cell_CD56Lo      CD16 NK cell                     NK_cell
 #> AAACGCACTGGTAC L75_T.Cell_CD4.Centr..Memory Memory CD4 T cell T_cell:CD4+_effector_memory
 ```
@@ -260,6 +263,19 @@ Then add the result to your Seurat object’s metadata:
 
 ``` r
 pbmc.demo <- AddMetaData(pbmc.demo, preds)
+
+pbmc.demo@meta.data |> head(10) 
+#>                nCount_RNA nFeature_RNA percent.mt seurat_annotations RNA_snn_res.0.8  RCAv2.GlobalPanel_CellTypes         DISCO.all           SingleR.hpca.fine
+#> AAACATACAACCAC       2419          779       3.02       Memory CD4 T             C06 L74_T.Cell_CD4.Centr..Memory Memory CD4 T cell  T_cell:CD4+_central_memory
+#> AAACATTGAGCTAC       4903         1352       3.79                  B             C02       L51_B.Cell_Bone.Marrow     Memory B cell             B_cell:immature
+#> AAACATTGATCAGC       3147         1129       0.89       Memory CD4 T             C01 L75_T.Cell_CD4.Centr..Memory Memory CD4 T cell  T_cell:CD4+_central_memory
+#> AAACCGTGCTTCCG       2639          960       1.74         CD14+ Mono             C03            L60_Monocyte_CD16     CD16 monocyte              Monocyte:CD16-
+#> AAACCGTGTATGCG        980          521       1.22                 NK             C08           L86_NK.Cell_CD56Lo      CD16 NK cell                     NK_cell
+#> AAACGCACTGGTAC       2163          781       1.66       Memory CD4 T             C01 L75_T.Cell_CD4.Centr..Memory Memory CD4 T cell T_cell:CD4+_effector_memory
+#> AAACGCTGACCAGT       2175          782       3.82              CD8 T             C04               L78_T.Cell_CD8   GZMB CD8 T cell                 T_cell:CD8+
+#> AAACGCTGGTTCTT       2260          790       3.10              CD8 T             C04   L76_T.Cell_CD4.Eff..Memory   GZMB CD8 T cell                 T_cell:CD8+
+#> AAACGCTGTAGCCA       1275          532       1.18        Naive CD4 T             C06               L82_T.Cell_CD8 Memory CD4 T cell T_cell:CD4+_effector_memory
+#> AAACGCTGTTTCTG       1103          550       2.90       FCGR3A+ Mono             C07            L61_Monocyte_CD16     CD16 monocyte              Monocyte:CD16+
 ```
 
 # Aligning predictions from cell-level to cluster-level
@@ -271,7 +287,7 @@ types:
 
 ``` r
 table(pbmc.demo$RCAv2.GlobalPanel_CellTypes,
-      pbmc.demo$RNA_snn_res.0.8) %>%
+      pbmc.demo$RNA_snn_res.0.8) |>
   print(zero.print = ".")
 #>                                      
 #>                                       C00 C01 C02 C03 C04 C05 C06 C07 C08 C09 C10
@@ -312,27 +328,47 @@ frequency (highest at the left) until a cumulative threshold is reached
 `text.size` (default: 2).
 
 ``` r
-lapply(chosen_panels, function(combo) {
-  align_prediction_to_cluster(
-    prediction = pbmc.demo@meta.data[, combo],
-    cluster    = pbmc.demo$RNA_snn_res.0.8,
-    text.size  = 3
-  ) + labs(title = combo)
-})
-#> [[1]]
+align_prediction_to_cluster(
+  prediction = pbmc.demo$RCAv2.GlobalPanel_CellTypes,
+  cluster    = pbmc.demo$RNA_snn_res.0.8,
+  text.size  = 3) + 
+  labs(title = "RCAv2.GlobalPanel_CellTypes")
 ```
 
-<img src="man/figures/README-unnamed-chunk-9-1.png" alt="" width="100%" height="100%" />
+<img src="man/figures/README-unnamed-chunk-10-1.png" alt="" width="100%" height="100%" />
 
-    #> 
-    #> [[2]]
+``` r
+align_prediction_to_cluster(
+  prediction = pbmc.demo$DISCO.all,
+  cluster    = pbmc.demo$RNA_snn_res.0.8,
+  text.size  = 3) + 
+  labs(title = "DISCO.all")
+```
 
-<img src="man/figures/README-unnamed-chunk-9-2.png" alt="" width="100%" height="100%" />
+<img src="man/figures/README-unnamed-chunk-11-1.png" alt="" width="100%" height="100%" />
 
-    #> 
-    #> [[3]]
+``` r
+align_prediction_to_cluster(
+  prediction = pbmc.demo$SingleR.hpca.fine,
+  cluster    = pbmc.demo$RNA_snn_res.0.8,
+  text.size  = 3) + 
+  labs(title = "SingleR.hpca.fine")
+```
 
-<img src="man/figures/README-unnamed-chunk-9-3.png" alt="" width="100%" height="100%" />
+<img src="man/figures/README-unnamed-chunk-12-1.png" alt="" width="100%" height="100%" />
+
+You can also use this function to look at the agreement between two
+prediction tools directly.
+
+``` r
+align_prediction_to_cluster(
+  prediction = pbmc.demo$SingleR.hpca.fine,
+  cluster    = pbmc.demo$DISCO.all,
+  text.size  = 3) + 
+  labs(title = "SingleR.hpca.fine vs DISCO.all")
+```
+
+<img src="man/figures/README-unnamed-chunk-13-1.png" alt="" width="100%" height="100%" />
 
 The function also supports text output formats via the `type` argument
 (`"split"`, `"long"`, or `"long.all"`):

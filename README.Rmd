@@ -56,7 +56,7 @@ pacman::p_load_gh("adairama/AnnotateCells")
 ```{r, echo = FALSE}
 pacman::p_load(tidyverse)
 data(allpanels_summary)
-knitr::kable(allpanels_summary %>% select(-cell_type) %>% unique() %>% remove_rownames())
+knitr::kable(allpanels_summary |> select(-cell_type) |> unique() |> remove_rownames())
 ```
 
 </details>
@@ -83,13 +83,13 @@ Note: `DISCO.all` is also a valid `combo` argument, which annotates against all 
 [celldex package for database](https://doi.org/doi:10.18129/B9.bioc.celldex)
 
 
-# Notes on annotation
+# Notes on Annotation tools
 
-1. The first DISCO annotation run triggers a one-time download of reference data (~175 MB) from the DISCO website, which may take up to 5 minutes. Once downloaded, the data is cached in the `AnnotateCells` package data directory and reused automatically in subsequent runs.
+1. **SingleR**: The `combo` argument may be suffixed with `.main`, `.fine`, or `.ont` (e.g., `"SingleR.hpca.main"`, `"SingleR.hpca.fine"`). Entries without a suffix default to `.main` (e.g., `"SingleR.hpca"` maps to `"SingleR.hpca.main"`).
 
-2. DISCO generates predictions at the group level, defined by `Idents()`. These group-level predictions are automatically expanded to the cell level to ensure consistency with other annotation tools in the package.
+2. **DISCO**: DISCO generates predictions at the group level as defined by `Idents()`. These predictions are automatically expanded to the cell level to ensure consistency with other annotation tools in this package.
 
-3. For SingleR, the `combo` argument may be suffixed with `.main`, `.fine`, or `.ont` (e.g. `"SingleR.hpca.main"`, `"SingleR.hpca.fine"`). Entries without a suffix default to `.main` (e.g. `"SingleR.hpca"` → `"SingleR.hpca.main"`).
+3. **DISCO (Online Server & Local Caching)**: By default, DISCO sends queries to an online server for prediction. You can choose to use a locally cached version by setting `AnnotateCells(..., local = TRUE)`. This triggers a one-time download of reference data (< 300 MB) from the DISCO website, which may take up to 5 minutes. Once downloaded, the data is saved in a hidden folder `.disco_cache` in the `Documents` (Windows OS) or `$HOME` (Linux/macOS) and automatically reused in subsequent runs.
 
 
 # Demo dataset
@@ -111,7 +111,7 @@ Two columns in `meta.data` are relevant here:
 - `RNA_snn_res.0.8`: cluster assignments from the Louvain algorithm at resolution 0.8, yielding 11 clusters (C00–C10) to be annotated
 
 ```{r}
-pbmc.demo@meta.data %>% head()
+pbmc.demo@meta.data |> head()
 
 # Cross-tabulation of ground truth labels vs clusters
 table(pbmc.demo$seurat_annotations, pbmc.demo$RNA_snn_res.0.8)
@@ -136,6 +136,22 @@ Then add the result to your Seurat object's metadata:
 
 ```{r}
 pbmc.demo <- AddMetaData(pbmc.demo, preds)
+
+pbmc.demo@meta.data |> head(10) 
+```
+
+```{r, echo=FALSE, eval=FALSE, message=FALSE, warning=FALSE}
+library(DT)
+
+datatable(
+  pbmc.demo@meta.data,
+  options = list(
+    pageLength = 20,          # Number of rows to display per page
+    scrollX    = TRUE,          # Enable horizontal scroll if there are many metadata columns
+    autoWidth  = TRUE
+  ),
+  rownames = TRUE            # Set to FALSE if you don't want cell barcodes/IDs in row names
+)
 ```
 
 
@@ -145,20 +161,44 @@ The tools above (except DISCO) generate predictions at the individual cell level
 
 ```{r}
 table(pbmc.demo$RCAv2.GlobalPanel_CellTypes,
-      pbmc.demo$RNA_snn_res.0.8) %>%
+      pbmc.demo$RNA_snn_res.0.8) |>
   print(zero.print = ".")
 ```
 
 The `align_prediction_to_cluster()` function visualizes this as a stacked barplot. For each cluster, cell type labels are ordered by frequency (highest at the left) until a cumulative threshold is reached (default: 70%). Labels below the threshold are collapsed into a grey "Misc." bar. Adjust the threshold with `thres` and label size with `text.size` (default: 2).
 
 ```{r}
-lapply(chosen_panels, function(combo) {
-  align_prediction_to_cluster(
-    prediction = pbmc.demo@meta.data[, combo],
-    cluster    = pbmc.demo$RNA_snn_res.0.8,
-    text.size  = 3
-  ) + labs(title = combo)
-})
+align_prediction_to_cluster(
+  prediction = pbmc.demo$RCAv2.GlobalPanel_CellTypes,
+  cluster    = pbmc.demo$RNA_snn_res.0.8,
+  text.size  = 3) + 
+  labs(title = "RCAv2.GlobalPanel_CellTypes")
+```
+
+```{r}
+align_prediction_to_cluster(
+  prediction = pbmc.demo$DISCO.all,
+  cluster    = pbmc.demo$RNA_snn_res.0.8,
+  text.size  = 3) + 
+  labs(title = "DISCO.all")
+```
+
+```{r}
+align_prediction_to_cluster(
+  prediction = pbmc.demo$SingleR.hpca.fine,
+  cluster    = pbmc.demo$RNA_snn_res.0.8,
+  text.size  = 3) + 
+  labs(title = "SingleR.hpca.fine")
+```
+
+You can also use this function to look at the agreement between two prediction tools directly.
+
+```{r}
+align_prediction_to_cluster(
+  prediction = pbmc.demo$SingleR.hpca.fine,
+  cluster    = pbmc.demo$DISCO.all,
+  text.size  = 3) + 
+  labs(title = "SingleR.hpca.fine vs DISCO.all")
 ```
 
 The function also supports text output formats via the `type` argument (`"split"`, `"long"`, or `"long.all"`):

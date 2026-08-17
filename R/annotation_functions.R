@@ -33,9 +33,12 @@ data_for_annotation <- function(obj, panel.data, min.express = 0, verbose = TRUE
   if( length(common) < 30 ) stop("Very few genes detected. Please check the input")
 
   return( list( query.data = query[ common, ],
-                panel.data = panel.data[ common, ] %>% as.matrix() ) )
+                panel.data = panel.data[ common, ] |> as.matrix() ) )
 }
 
+
+
+# RCA ---------------------------------------------------------------------
 
 #' Get the correlation embeddings / projections for RCAv2 annotation
 #'
@@ -88,7 +91,7 @@ RCA_project <- function(obj, panel.name = NULL, ...){
 
   ## Soft-thresholding and scale each barcode
   projection <- abs(projection)^(dots$power) * sign(projection)
-  projection <- apply(projection, 1, function(x) (x - mean(x))/sd(x) ) %>% t()
+  projection <- apply(projection, 1, function(x) (x - mean(x))/sd(x) ) |> t()
 
   return(projection)
 }
@@ -121,81 +124,34 @@ RCAv2_annotate <- function(obj, panel.name, ...){
 }
 
 
-#' Load or download and load the DISCO reference data and deg (differentially expressed genes)
-#'
-#' @param type data or deg
-#'
-#' @return For `type = "data"`, a matrix of weights, where rows are genes and columns are panels. For `type = "deg"`, a dataframe listing the genes involved in each panel.
-#' @export
-DISCO_data <- function(type = c("data", "deg")){
-
-  require(DISCOtoolkit)
-
-  ref_path <- file.path( pacman::p_path("AnnotateCells"), "data" )
-
-  # Load reference data. Download first time.
-  ref_file <- paste0(ref_path, "/ref_", type, ".rds")
-
-  if (file.exists(ref_file)) {
-
-    message(paste("Loading reference", type, "from local file..."))
-    out <- readRDS(ref_file)
-
-  } else {
-
-    message(paste("Downloading reference", type, "from server..."))
-
-    ## Extend timeout temporarily
-    op <- options(timeout = 600)
-    on.exit(options(op), add = TRUE)
-
-    ## Download
-    tryCatch({
-      link <- paste0( getOption("disco_url"), "toolkit/getRef" )
-      if(type == "deg") link <- paste0(link, "Deg")
-
-      con <- curl::curl(link)
-      out <- readRDS(con)
-      close(con)
-
-      ## Save a local copy
-      saveRDS(out, file = ref_file)
-      message("Download complete. File saved to: ", ref_file)
-
-    }, error = function(e) {
-      stop("Failed to download or read reference data: ", conditionMessage(e))
-    })
-  }
-
-  return(out)
-}
-
-
-DISCO_annotate <- function(obj, panel.name = "all", assay = "RNA", ...){
+# DISCO -------------------------------------------------------------------
+DISCO_annotate <- function(obj, panel.name = "all", local = FALSE,
+                           n_predict = 1, ref_path = "~/.disco_cache", verbose = TRUE){
 
   # Prepare the query dataset
   if( nlevels(Idents(obj)) == 1 ) stop("Check if Idents are set")
-  Idents(obj) <- paste0("C", Idents(obj))
 
-  data.ave <- AverageExpression(obj, assays = assay, layer = "data")[[1]] %>%
+  avg <- Seurat::AverageExpression(obj, assays = "RNA", layer = "counts")$RNA |>
     as.matrix()
 
-  # Prepare the reference dataset
-  ref_data <- DISCO_data("data")
-  ref_deg  <- DISCO_data("deg")
+  colnames(avg) <- gsub("^g(\\d+)$", "\\1", colnames(avg))
 
-  # Run group-level prediction
-  if(panel.name == "all"){ atlas <- NULL } else { atlas <- panel.name }
-
+  ## Calculate
   require(DISCOtoolkit)
-  grp_pred <- CELLiDCluster(data.ave, ref_data, ref_deg, atlas, ncores = 1, ...) %>%
-    rownames_to_column("Ident")
-  grp_pred %>% mutate(Ident = gsub("^C", "", Ident)) %>% knitr::kable() %>% print()
+
+  if (local) {
+    grp_pred <- DISCOtoolkit:::.cellid_local (avg, panel.name, n_predict, ref_path, verbose)
+  } else {
+    grp_pred <- DISCOtoolkit:::.cellid_remote(avg, panel.name, n_predict, verbose)
+  }
+
+  grp_pred |> knitr::kable() |> print()
+
 
   ## Map from group-level to cell-level prediction
-  map <- grp_pred %>% select(Ident, predict_cell_type_1) %>% deframe()
+  map <- grp_pred |> select(cluster, predicted_cell_type) |> deframe()
 
-  pred <- map[ Idents(obj) ] %>% data.frame()
+  pred <- map[ Idents(obj) ] |> data.frame()
 
   dimnames(pred) <- list(colnames(obj),
                          paste0("DISCO.", panel.name))
@@ -203,6 +159,8 @@ DISCO_annotate <- function(obj, panel.name = "all", assay = "RNA", ...){
   return(pred)
 }
 
+
+# SingleR -----------------------------------------------------------------
 
 #' Returns the pruned labels from SingleR
 #'
@@ -225,7 +183,7 @@ SingleR_annotate <- function(obj, panel.name, version = "2024-02-26", label = NA
   ref.se <- celldex::fetchReference(panel.name, version, realize.assays = TRUE)
 
   if( suppressWarnings( nrow(GetAssayData(obj, layer = "scale.data")) == 0 ) ){
-    obj <- obj %>% ScaleData(verbose = FALSE)
+    obj <- obj |> ScaleData(verbose = FALSE)
   }
 
   suppressMessages(
@@ -235,9 +193,9 @@ SingleR_annotate <- function(obj, panel.name, version = "2024-02-26", label = NA
   )
 
   ## Return the pruned labels
-  pred <- pred %>%
-    data.frame() %>%
-    select(y = pruned.labels) %>%
+  pred <- pred |>
+    data.frame() |>
+    select(y = pruned.labels) |>
     mutate(y = ifelse(is.na(y), "Unassigned", y))
 
   colnames(pred) <- paste0("SingleR.", panel.name,
